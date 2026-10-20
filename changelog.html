@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark light">
+<title>What's new — Analysis</title>
+<meta name="description" content="Release notes for the Analysis ranking system, workspace and chatbot analytics.">
+<meta property="og:type" content="website"><meta property="og:title" content="What's new — Analysis">
+<meta property="og:description" content="Release notes for the Analysis ranking system, workspace and chatbot analytics.">
+<meta name="twitter:card" content="summary">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#06070f;--card:rgba(20,24,48,.62);--line:rgba(160,170,255,.14);--line2:rgba(160,170,255,.28);--tx:#f3f5ff;--tx2:#a1a9d0;--tx3:#6b7399;--c1:#4f8cff;--c2:#8b5cf6;--ok:#34d399;--warn:#fbbf24;--bad:#fb7185;
+    --glow:radial-gradient(600px 300px at 20% -10%,rgba(79,140,255,.22),transparent 60%),radial-gradient(520px 320px at 100% 0%,rgba(139,92,246,.2),transparent 55%)}
+  [data-theme=light]{--bg:#f4f6fc;--card:rgba(255,255,255,.9);--line:rgba(30,40,90,.10);--line2:rgba(30,40,90,.22);--tx:#10152b;--tx2:#51597d;--tx3:#8a91b0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--glow),var(--bg);background-attachment:fixed;color:var(--tx);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  :focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+  .wrap{max-width:760px;margin:0 auto;padding:1.4rem 1rem 3rem}
+  .top{display:flex;align-items:center;gap:.6rem;margin-bottom:1.6rem}.grow{flex:1}
+  .ibtn{height:34px;padding:0 .8rem;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--tx);font:600 .78rem Inter,sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.7rem,4vw,2.3rem);letter-spacing:-.03em;margin:0 0 .3rem}
+  .grad{background:linear-gradient(95deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--tx2);margin:0 0 1.2rem;font-size:.92rem}
+  .filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.4rem}
+  .f{border:1px solid var(--line2);background:transparent;color:var(--tx2);border-radius:999px;padding:.35rem .8rem;font:600 .76rem Inter,sans-serif;cursor:pointer}
+  .f[aria-pressed=true]{background:linear-gradient(135deg,var(--c1),var(--c2));border-color:transparent;color:#fff}
+  .rel{margin-bottom:1.8rem}.rel h2{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;margin:0 0 .15rem}.rel .d{color:var(--tx3);font-size:.78rem;margin-bottom:.7rem}
+  .it{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.8rem 1rem;margin-bottom:.55rem}
+  .it b{font-size:.92rem}.it p{margin:.3rem 0 0;color:var(--tx2);font-size:.84rem;line-height:1.55}
+  .tag{display:inline-block;font-size:.66rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;margin-right:.45rem;text-transform:uppercase;letter-spacing:.05em}
+  .feature{background:rgba(79,140,255,.16);color:var(--c1)}.improvement{background:rgba(52,211,153,.16);color:var(--ok)}.fix{background:rgba(251,191,36,.16);color:var(--warn)}.breaking{background:rgba(251,113,133,.16);color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="ibtn" href="./analysis.html">← Ranking</a><div class="grow"></div><button class="ibtn" id="themeBtn" aria-label="Toggle light or dark theme">◐</button></div>
+  <h1>What's <span class="grad">new</span></h1>
+  <p class="sub">Release notes for the ranking system, workspace and chatbot analytics.</p>
+  <div class="filters" role="group" aria-label="Filter by type" id="filters"></div>
+  <div id="list" aria-live="polite">Loading…</div>
+</div>
+<script>
+(function () {
+  var FALLBACK = [
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Chatbot analytics for Nexora AI",
+    "notes": "Conversations, messages, satisfaction (thumbs), error rate, reply latency percentiles, depth, topics and a chatbot health score."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Audience, retention and funnels",
+    "notes": "Traffic sources, devices, new vs returning visitors, day-1 and day-7 retention and custom event funnels."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "improvement",
+    "title": "Core Web Vitals and JavaScript error tracking",
+    "notes": "Per-site loading, layout-shift and responsiveness verdicts plus error rates in the Reliability tab."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "improvement",
+    "title": "Alerts to Discord, Slack and Telegram",
+    "notes": "Send alerts to your chat apps, and export the weekly report as Markdown or PDF."
+  },
+  {
+    "version": "2.0.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Insights, alerts and status page",
+    "notes": "Seven-day forecasts, anomaly detection and a status page."
+  },
+  {
+    "version": "1.5.0",
+    "date": "2026-10-17",
+    "type": "feature",
+    "title": "Workspace: OKRs, RICE roadmap, sprints, experiments and feature flags",
+    "notes": "Product and project management tools in one page."
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-10-16",
+    "type": "feature",
+    "title": "Ranking system",
+    "notes": "Multi-factor ranking using PageRank, Elo, Wilson, Bayesian and rank-fusion methods."
+  }
+];
+  var $ = function (id) { return document.getElementById(id); }, esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var items = FALLBACK, type = 'all';
+  function render() {
+    var types = ['all'].concat(Array.from(new Set(items.map(function (i) { return i.type; }))));
+    $('filters').innerHTML = types.map(function (t) { return '<button class="f" aria-pressed="' + (t === type) + '" data-t="' + t + '">' + t + '</button>'; }).join('');
+    var by = {}; items.filter(function (i) { return type === 'all' || i.type === type; }).forEach(function (i) { var k = i.version + '|' + i.date; (by[k] = by[k] || []).push(i); });
+    var keys = Object.keys(by).sort(function (a, b) { return b.split('|')[1].localeCompare(a.split('|')[1]) || b.localeCompare(a, undefined, { numeric: true }); });
+    $('list').innerHTML = keys.map(function (k) { var p = k.split('|');
+      return '<section class="rel"><h2>v' + esc(p[0]) + '</h2><div class="d">' + new Date(p[1] + 'T00:00:00Z').toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) + '</div>' +
+        by[k].map(function (i) { return '<div class="it"><span class="tag ' + esc(i.type) + '">' + esc(i.type) + '</span><b>' + esc(i.title) + '</b>' + (i.notes ? '<p>' + esc(i.notes) + '</p>' : '') + '</div>'; }).join('') + '</section>'; }).join('') || '<p class="sub">Nothing here yet.</p>';
+  }
+  $('filters').addEventListener('click', function (e) { var t = e.target.getAttribute('data-t'); if (t) { type = t; render(); } });
+  render();
+  fetch('./changelog.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (j) { if (Array.isArray(j) && j.length) { items = j; render(); } }).catch(function () {});
+  var t; try { t = localStorage.getItem('nexora_rank_theme_v1'); } catch (e) {} if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  $('themeBtn').onclick = function () { var n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try { localStorage.setItem('nexora_rank_theme_v1', n); } catch (e) {} };
+})();
+</script>
+</body>
+</html>

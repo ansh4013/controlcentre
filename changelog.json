@@ -1,0 +1,51 @@
+[
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Chatbot analytics for Nexora AI",
+    "notes": "Conversations, messages, satisfaction (thumbs), error rate, reply latency percentiles, depth, topics and a chatbot health score."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Audience, retention and funnels",
+    "notes": "Traffic sources, devices, new vs returning visitors, day-1 and day-7 retention and custom event funnels."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "improvement",
+    "title": "Core Web Vitals and JavaScript error tracking",
+    "notes": "Per-site loading, layout-shift and responsiveness verdicts plus error rates in the Reliability tab."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "improvement",
+    "title": "Alerts to Discord, Slack and Telegram",
+    "notes": "Send alerts to your chat apps, and export the weekly report as Markdown or PDF."
+  },
+  {
+    "version": "2.0.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Insights, alerts and status page",
+    "notes": "Seven-day forecasts, anomaly detection and a status page."
+  },
+  {
+    "version": "1.5.0",
+    "date": "2026-10-17",
+    "type": "feature",
+    "title": "Workspace: OKRs, RICE roadmap, sprints, experiments and feature flags",
+    "notes": "Product and project management tools in one page."
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-10-16",
+    "type": "feature",
+    "title": "Ranking system",
+    "notes": "Multi-factor ranking using PageRank, Elo, Wilson, Bayesian and rank-fusion methods."
+  }
+]

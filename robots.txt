@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ansh4013.github.io/dashboard/sitemap.xml

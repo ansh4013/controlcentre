@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Live ranking, workspace, chatbot analytics and status for Nexora AI, Discipline and the Dashboard.">
+<meta property="og:type" content="website"><meta property="og:title" content="Analysis Workspace">
+<meta property="og:description" content="Live ranking, workspace, chatbot analytics and status for Nexora AI, Discipline and the Dashboard.">
+<meta name="twitter:card" content="summary">
+<title>Analysis Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  @property --p{syntax:'<number>';inherits:false;initial-value:0}
+  :root{--bg:#06070f;--card:rgba(20,24,48,.62);--card-solid:#10142a;--line:rgba(160,170,255,.14);--line2:rgba(160,170,255,.28);
+    --tx:#f3f5ff;--tx2:#a1a9d0;--tx3:#6b7399;--track:rgba(160,170,255,.14);--c1:#4f8cff;--c2:#8b5cf6;--c3:#22d3ee;
+    --gold:#fbbf24;--ok:#34d399;--bad:#fb7185;--warn:#fbbf24;--shadow:0 10px 40px rgba(0,0,0,.35);--r:20px;
+    --glow:radial-gradient(600px 300px at 20% -10%,rgba(79,140,255,.22),transparent 60%),radial-gradient(520px 320px at 100% 0%,rgba(139,92,246,.2),transparent 55%)}
+  [data-theme=light]{--bg:#f4f6fc;--card:rgba(255,255,255,.85);--card-solid:#fff;--line:rgba(30,40,90,.10);--line2:rgba(30,40,90,.22);
+    --tx:#10152b;--tx2:#51597d;--tx3:#8a91b0;--track:rgba(30,40,90,.08);--shadow:0 10px 34px rgba(40,60,140,.10);
+    --glow:radial-gradient(600px 300px at 20% -10%,rgba(79,140,255,.2),transparent 60%),radial-gradient(520px 320px at 100% 0%,rgba(139,92,246,.14),transparent 55%)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--glow),var(--bg);background-attachment:fixed;color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  a{color:inherit}
+  .num,.display{font-family:'Space Grotesk',Inter,sans-serif;font-variant-numeric:tabular-nums}
+  .grow{flex:1}
+
+  /* top bar + tabs */
+  .bar{position:sticky;top:0;z-index:30;backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);background:color-mix(in srgb,var(--bg) 72%,transparent);border-bottom:1px solid var(--line)}
+  .bar-in{max-width:1180px;margin:0 auto;padding:.65rem 1rem;display:flex;align-items:center;gap:.7rem}
+  .logo{width:34px;height:34px;border-radius:10px;background:conic-gradient(from 210deg,var(--c1),var(--c2),var(--c3),var(--c1));display:grid;place-items:center;box-shadow:0 4px 18px rgba(79,140,255,.45)}
+  .brand{font-weight:700;letter-spacing:-.01em}.brand small{display:block;font-weight:500;font-size:.68rem;color:var(--tx3);margin-top:-1px}
+  .chip-s{display:inline-flex;align-items:center;gap:.4rem;font-size:.74rem;font-weight:600;padding:.32rem .7rem;border-radius:999px;border:1px solid var(--line2);color:var(--tx2);background:var(--card)}
+  .chip-s i{width:7px;height:7px;border-radius:50%;background:var(--tx3)}
+  .chip-s.live{color:var(--ok)}.chip-s.live i{background:var(--ok)}.chip-s.partial i,.chip-s.cached i{background:var(--warn)}.chip-s.offline i{background:var(--bad)}
+  .ibtn{height:36px;min-width:36px;padding:0 .75rem;border-radius:11px;border:1px solid var(--line2);background:var(--card);display:inline-flex;align-items:center;justify-content:center;gap:.4rem;font-size:.8rem;font-weight:600;text-decoration:none;transition:.2s}
+  .ibtn:hover{border-color:var(--c1);transform:translateY(-1px)}
+  .kbd{font-size:.68rem;color:var(--tx3);border:1px solid var(--line2);border-radius:6px;padding:.05rem .35rem}
+  .tabs{max-width:1180px;margin:0 auto;padding:0 1rem;display:flex;gap:.2rem;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;border:0;background:none;padding:.65rem .85rem;font-size:.84rem;font-weight:600;color:var(--tx3);border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+  .tab:hover{color:var(--tx)}.tab.on{color:var(--tx);border-color:var(--c1)}
+
+  main{max-width:1180px;margin:0 auto;padding:1.3rem 1rem 3.5rem}
+  .eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3)}
+  .ph{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:.6rem;margin-bottom:1rem}
+  .ph h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.5rem,3.6vw,2.1rem);letter-spacing:-.03em;margin:.15rem 0 0}
+  .ph p{margin:.3rem 0 0;color:var(--tx2);font-size:.86rem;max-width:62ch}
+  .grad{background:linear-gradient(95deg,var(--c1),var(--c2) 55%,var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:1.1rem 1.2rem;min-width:0}
+  .card-h{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.85rem;flex-wrap:wrap}
+  .card-h h2,.card-h h3{margin:0;font-size:.95rem;font-weight:700;letter-spacing:-.01em}
+  .card-h p{margin:.15rem 0 0;font-size:.74rem;color:var(--tx3)}
+  .grid{display:grid;gap:1rem}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .mt{margin-top:1rem}
+  .btn{border:1px solid var(--line2);background:transparent;border-radius:10px;padding:.42rem .85rem;font-size:.78rem;font-weight:600;transition:.2s}
+  .btn:hover{border-color:var(--c1)}
+  .btn.pri{background:linear-gradient(135deg,var(--c1),var(--c2));border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(79,140,255,.32)}
+  .btn.sm{padding:.25rem .55rem;font-size:.72rem;border-radius:8px}.btn.dng:hover{border-color:var(--bad);color:var(--bad)}
+  .tag{display:inline-block;font-size:.68rem;font-weight:650;padding:.2rem .55rem;border-radius:999px;background:var(--track);color:var(--tx2);white-space:nowrap}
+  .tag.g{background:rgba(52,211,153,.15);color:var(--ok)}.tag.a{background:rgba(251,191,36,.16);color:var(--warn)}.tag.r{background:rgba(251,113,133,.16);color:var(--bad)}.tag.b{background:rgba(79,140,255,.16);color:var(--c1)}
+  .muted{color:var(--tx3);font-size:.76rem}
+  .empty{padding:1.4rem;text-align:center;color:var(--tx3);font-size:.85rem;border:1px dashed var(--line2);border-radius:14px}
+
+  /* KPI + rag */
+  .kpi{padding:1rem 1.1rem}.kpi .l{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3)}
+  .kpi .v{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;letter-spacing:-.03em;margin:.2rem 0}
+  .kpi .d{font-size:.76rem;font-weight:600}.up{color:var(--ok)}.dn{color:var(--bad)}.fl{color:var(--tx3)}
+  .rag{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:.45rem}
+  .rag.green{background:var(--ok);box-shadow:0 0 10px var(--ok)}.rag.amber{background:var(--warn);box-shadow:0 0 10px var(--warn)}.rag.red{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+  .prod{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 0;border-top:1px solid var(--line)}.prod:first-child{border-top:0}
+  .prod b{font-size:.95rem}.prod ul{margin:.3rem 0 0;padding-left:1.1rem;color:var(--tx2);font-size:.8rem;line-height:1.55}
+  .bar-p{height:8px;border-radius:99px;background:var(--track);overflow:hidden}.bar-p i{display:block;height:100%;border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .fun{display:grid;gap:.5rem}.fun .row{display:grid;grid-template-columns:92px 1fr 64px;align-items:center;gap:.7rem;font-size:.8rem}
+  .fun .b{height:26px;border-radius:8px;background:linear-gradient(90deg,var(--c1),var(--c2));min-width:4px;transition:width .7s}
+
+  /* ring */
+  .ring{--p:0;--s:64px;--t:7px;width:var(--s);height:var(--s);border-radius:50%;position:relative;display:grid;place-items:center;flex:none;background:conic-gradient(from -90deg,var(--k,var(--c1)) calc(var(--p)*1%),var(--track) 0);transition:--p .9s cubic-bezier(.2,.8,.2,1)}
+  .ring::after{content:'';position:absolute;inset:var(--t);border-radius:50%;background:var(--card-solid)}
+  .ring b{position:relative;z-index:1;font-family:'Space Grotesk',sans-serif;font-size:calc(var(--s)*.27)}
+
+  /* OKR */
+  .kr{padding:.8rem 0;border-top:1px solid var(--line)}.kr:first-of-type{border-top:0}
+  .kr-h{display:flex;justify-content:space-between;gap:.6rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:.45rem;font-size:.85rem;font-weight:600}
+  .kr-m{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap;margin-top:.5rem;font-size:.74rem;color:var(--tx3)}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;outline:none;background:linear-gradient(90deg,var(--c1) var(--v,0%),var(--track) var(--v,0%))}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--c1);cursor:grab}
+  input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--c1)}
+  .inp,.sel,.txa{width:100%;background:var(--track);border:1px solid transparent;border-radius:10px;padding:.5rem .65rem;font-size:.84rem;outline:none}
+  .inp:focus,.sel:focus,.txa:focus{border-color:var(--c1)}
+  .inp.s{width:80px;padding:.25rem .45rem;font-size:.76rem;border-radius:8px}
+  .txa{min-height:70px;resize:vertical}
+
+  /* kanban */
+  .board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;align-items:start}
+  .lane{background:color-mix(in srgb,var(--card-solid) 45%,transparent);border:1px solid var(--line);border-radius:16px;padding:.7rem;min-height:140px}
+  .lane.over{border-color:var(--c1);background:color-mix(in srgb,var(--c1) 8%,transparent)}
+  .lane-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
+  .item{background:var(--card-solid);border:1px solid var(--line);border-radius:13px;padding:.7rem .75rem;margin-bottom:.55rem;cursor:grab;transition:transform .2s,border-color .2s}
+  .item:hover{border-color:var(--line2);transform:translateY(-1px)}.item.drag{opacity:.4}
+  .item b{font-size:.84rem;display:block;margin-bottom:.35rem;letter-spacing:-.01em}
+  .item .meta{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+  .item .acts{display:flex;gap:.25rem;margin-top:.5rem}
+  .pr{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--gold);font-size:.78rem}
+
+  table.t{width:100%;border-collapse:collapse;font-size:.82rem}
+  table.t th{text-align:left;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);padding:.4rem .5rem;font-weight:700}
+  table.t td{padding:.6rem .5rem;border-top:1px solid var(--line);vertical-align:middle}
+  .tw{overflow-x:auto}
+
+  /* switch */
+  .sw{position:relative;width:42px;height:24px;flex:none}
+  .sw input{opacity:0;position:absolute;inset:0;margin:0;cursor:pointer;z-index:2}
+  .sw span{position:absolute;inset:0;background:var(--track);border-radius:99px;transition:.25s}
+  .sw span::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .sw input:checked+span{background:linear-gradient(135deg,var(--c1),var(--c2))}.sw input:checked+span::after{transform:translateX(18px)}
+  .flag{display:grid;grid-template-columns:auto 1fr 190px auto;gap:.9rem;align-items:center;padding:.85rem 0;border-top:1px solid var(--line)}.flag:first-child{border-top:0}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre{background:var(--track);border-radius:12px;padding:.85rem;font-size:.74rem;overflow:auto;margin:0;line-height:1.55;color:var(--tx2)}
+  code.k{background:var(--track);border-radius:6px;padding:.1rem .4rem;font-size:.76rem}
+
+  /* dialog + palette + toast */
+  dialog{border:1px solid var(--line2);border-radius:20px;background:var(--card-solid);color:var(--tx);padding:0;width:min(520px,94vw);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  dialog::backdrop{background:rgba(4,6,16,.6);backdrop-filter:blur(4px)}
+  .mf{padding:1.2rem 1.3rem;display:grid;gap:.8rem}.mf h3{margin:0;font-size:1.05rem}.mf label{display:grid;gap:.3rem;font-size:.74rem;font-weight:650;color:var(--tx2)}
+  .mf .row2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}.mf .acts{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.3rem}
+  .pal{padding:0}.pal input{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;padding:1rem 1.2rem;font-size:1rem;outline:none}
+  .pal ul{list-style:none;margin:0;padding:.4rem;max-height:320px;overflow:auto}
+  .pal li{padding:.6rem .8rem;border-radius:10px;font-size:.88rem;cursor:pointer;display:flex;justify-content:space-between}
+  .pal li.on{background:linear-gradient(135deg,rgba(79,140,255,.25),rgba(139,92,246,.25))}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);background:var(--card-solid);border:1px solid var(--line2);padding:.6rem 1rem;border-radius:12px;font-size:.82rem;opacity:0;transition:.3s;z-index:60;box-shadow:var(--shadow)}
+  #toast.on{transform:translate(-50%,0);opacity:1}
+
+  @media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.flag{grid-template-columns:auto 1fr}.flag .ro{grid-column:1/-1}}
+  @media(max-width:600px){.g2,.g3,.g4,.board{grid-template-columns:1fr}.brand small,.hide-xs{display:none}.fun .row{grid-template-columns:70px 1fr 56px}}
+  :focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+  .skip{position:absolute;left:-999px;top:.5rem;z-index:100;background:var(--card-solid);color:var(--tx);padding:.5rem .9rem;border-radius:10px;border:1px solid var(--line2)}.skip:focus{left:.8rem}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}.seg2{display:inline-flex;gap:.3rem;flex-wrap:wrap}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#view">Skip to content</a>
+<header class="bar">
+  <div class="bar-in">
+    <div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+    <div class="brand">Analysis<small>Product &amp; Project Workspace</small></div>
+    <div class="grow"></div>
+    <span class="chip-s" id="status"><i></i><span id="statusTxt">Connecting</span></span>
+    <a class="ibtn hide-xs" href="./analysis.html" data-i18n="ranking" data-def="Ranking">Ranking</a>
+    <a class="ibtn hide-xs" href="./analysis-status.html" data-i18n="status" data-def="Status">Status</a>
+    <button class="ibtn" id="palBtn" title="Command palette" aria-label="Open command palette">⌘K</button>
+    <select id="langSel" class="ibtn hide-xs" aria-label="Language" style="appearance:auto;padding:0 .4rem"><option value="en">EN</option><option value="hi">हिन्दी</option><option value="es">ES</option></select>
+    <button class="ibtn" id="bellBtn" data-act="tab" data-v="activity" title="Alerts &amp; activity" aria-label="Alerts and activity">🔔<span id="bellN" class="tag r" style="display:none;margin-left:.15rem"></span></button>
+    <button class="ibtn" id="themeBtn" title="Toggle theme" aria-label="Toggle light or dark theme" aria-label="Toggle light or dark theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Workspace sections"></nav>
+</header>
+<main id="view" tabindex="-1"></main>
+<dialog id="dlg"></dialog>
+<dialog id="pal" class="pal"><input id="palIn" placeholder="Jump to a section or run an action…" autocomplete="off"><ul id="palList"></ul></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="importFile" accept="application/json" hidden>
+
+<script>
+window.addEventListener('error',function(e){var v=document.getElementById('view')||document.body;
+  if(v&&!v.children.length){v.innerHTML='<div style="padding:2rem;font:14px system-ui;color:#fb7185">Something went wrong loading this page: '+String(e.message).replace(/</g,'&lt;')+'</div>';}});
+</script>
+<script>
+/* ---- inlined from analysis-config.js (page works as a single file) ---- */
+/**
+ * analysis-config.js
+ * -----------------
+ * Single place to configure the Analysis Ranking System.
+ * Works in the browser (window.NEXORA_RANKING_CONFIG) and in Node (require).
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.NEXORA_RANKING_CONFIG = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  return {
+    // Public counter API used by tracker.js
+    api: 'https://countapi.mileshilliard.com/api/v1',
+    timeoutMs: 8000,
+    concurrency: 6,
+
+    refreshMs: 30000,      // auto-refresh interval on analysis.html
+    historyDays: 14,       // days of daily history used for trend scoring (min 14)
+    engagedSeconds: 30,    // a visit counts as "engaged" after this many seconds
+    confidenceK: 30,       // views needed for ~50% confidence in a site's score
+    emaAlpha: 0.35,        // smoothing factor for recent-traffic average
+    closeRaceGap: 2,       // score gap (points) below which a race is "close"
+
+    sites: [
+      { id: 'nexora',     name: 'Nexora AI',      key: 'ansh4013_nexora_views',     url: 'https://ansh4013.github.io/aichatbot-/' },
+      { id: 'discipline', name: 'Discipline',     key: 'ansh4013_discipline_views', url: 'https://ansh4013.github.io/dashboard/discipline.html' },
+      { id: 'dashboard',  name: 'Main Dashboard', key: 'ansh4013_dashboard_views',  url: 'https://ansh4013.github.io/dashboard/' }
+    ],
+
+    // ---- Chatbot analytics (Nexora AI) ----
+    chat: {
+      siteId: 'nexora',
+      topics: [['coding', 'Coding'], ['writing', 'Writing'], ['study', 'Study & learning'], ['business', 'Business & career'], ['general', 'General']],
+      latencyBuckets: [['lat_1', '< 1 s', 1000], ['lat_2', '1 – 2 s', 2000], ['lat_4', '2 – 4 s', 4000], ['lat_8', '4 – 8 s', 8000], ['lat_9', '8 s +', 16000]],
+      depthBuckets: [['mpc_1', '1 message'], ['mpc_2', '2 messages'], ['mpc_3_5', '3 – 5 messages'], ['mpc_6p', '6+ messages']],
+      thresholds: { errorRate: 0.10, csat: 0.60, p95Ms: 8000, minReplies: 20, minVotes: 10 }
+    },
+    sources: [['direct', 'Direct'], ['search', 'Search'], ['social', 'Social'], ['github', 'GitHub'], ['email', 'Email'], ['other', 'Other']],
+    devices: [['desktop', 'Desktop'], ['mobile', 'Mobile']],
+    vitals: [['lcp', 'Loading (LCP)', '≤ 2.5 s'], ['cls', 'Layout shift (CLS)', '≤ 0.1'], ['inp', 'Responsiveness (INP)', '≤ 200 ms']],
+
+    // How sites link to each other (feeds PageRank "authority"). from/to are site ids.
+    links: [
+      { from: 'dashboard', to: 'nexora' },
+      { from: 'dashboard', to: 'discipline' }
+    ],
+
+    // 'weighted' = weighted sum of metric scores
+    // 'fusion'   = weighted Reciprocal Rank Fusion (merge each metric's ranking, like search engines)
+    method: 'weighted',
+    bayesM: 20,            // IMDb-style prior strength (sessions) for engagement quality
+    hotGravity: 1.8,       // Hacker-News-style freshness decay
+
+    // Relative importance of each metric (any scale — normalised automatically)
+    weights: { reach: 15, traction: 15, momentum: 10, consistency: 10, engagement: 10, authority: 10, freshness: 15, elo: 15 },
+
+    presets: {
+      Balanced:   { reach: 15, traction: 15, momentum: 10, consistency: 10, engagement: 10, authority: 10, freshness: 15, elo: 15 },
+      Popularity: { reach: 40, traction: 25, momentum: 0,  consistency: 5,  engagement: 0,  authority: 15, freshness: 5,  elo: 10 },
+      Trending:   { reach: 5,  traction: 15, momentum: 30, consistency: 0,  engagement: 0,  authority: 0,  freshness: 35, elo: 15 },
+      Quality:    { reach: 5,  traction: 10, momentum: 5,  consistency: 20, engagement: 40, authority: 10, freshness: 0,  elo: 10 },
+      Competitive:{ reach: 5,  traction: 15, momentum: 10, consistency: 5,  engagement: 5,  authority: 5,  freshness: 15, elo: 40 }
+    }
+  };
+});
+
+</script>
+<script>
+/* ---- inlined from analysis-algorithms.js (page works as a single file) ---- */
+/**
+ * analysis-algorithms.js
+ * -------------
+ * Classic ranking algorithms used by large tech platforms, as small pure functions.
+ * No network, no DOM: usable in the browser and in Node.
+ *
+ *  pageRank          Google    – authority from the link graph (damped random surfer)
+ *  eloLeague         Chess/FIFA/FiveThirtyEight – head-to-head ratings with margin-of-victory
+ *  hotScore          Hacker News – points decay with age (gravity)
+ *  bayesianRating    IMDb Top 250 – weighted rating, shrinks small samples toward the mean
+ *  wilsonLowerBound  Reddit "best" – confidence-aware proportion
+ *  reciprocalRankFusion  search engines (Elastic/Azure/academic IR) – merge many rankings
+ *  detectAnomalies   Datadog/Google-style monitoring – robust z-score (median + MAD) on daily traffic
+ *  forecast          Holt's linear trend with day-of-week seasonality + prediction band
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.NexoraAlgorithms = api;
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  /** nodes: ['a','b']; edges: [{from,to,w?}]. Returns {id: probability} summing to 1. */
+  function pageRank(nodes, edges, opts) {
+    opts = opts || {};
+    var d = opts.damping === undefined ? 0.85 : opts.damping;
+    var n = nodes.length, out = {}, pr = {}, i, k;
+    if (!n) return {};
+    nodes.forEach(function (id) { out[id] = []; pr[id] = 1 / n; });
+    (edges || []).forEach(function (e) {
+      if (out[e.from] && out[e.to] !== undefined && e.from !== e.to) out[e.from].push({ to: e.to, w: e.w || 1 });
+    });
+    for (i = 0; i < (opts.iterations || 100); i++) {
+      var next = {}, dangling = 0;
+      nodes.forEach(function (id) { next[id] = (1 - d) / n; });
+      nodes.forEach(function (id) {
+        var links = out[id], tw = links.reduce(function (t, l) { return t + l.w; }, 0);
+        if (!tw) { dangling += pr[id]; return; }      // sink: spread evenly
+        links.forEach(function (l) { next[l.to] += d * pr[id] * l.w / tw; });
+      });
+      var diff = 0;
+      nodes.forEach(function (id) {
+        next[id] += d * dangling / n;
+        diff += Math.abs(next[id] - pr[id]);
+      });
+      pr = next;
+      if (diff < 1e-10) break;
+    }
+    return pr;
+  }
+
+  /**
+   * Elo league from daily head-to-head results.
+   * series: {id: [dailyViews oldest->newest]}. Each day every pair "plays";
+   * more views wins. Margin-of-victory multiplier damps blow-outs (FiveThirtyEight style).
+   * Returns {id: rating}; start 1500.
+   */
+  function eloLeague(series, opts) {
+    opts = opts || {};
+    var K = opts.k || 24, ids = Object.keys(series), rating = {};
+    ids.forEach(function (id) { rating[id] = 1500; });
+    var days = ids.length ? series[ids[0]].length : 0;
+    for (var t = 0; t < days; t++) {
+      for (var a = 0; a < ids.length; a++) {
+        for (var b = a + 1; b < ids.length; b++) {
+          var A = ids[a], B = ids[b], va = series[A][t] || 0, vb = series[B][t] || 0;
+          if (va === 0 && vb === 0) continue;               // nobody showed up: no match
+          var sa = va > vb ? 1 : (va < vb ? 0 : 0.5);
+          var ea = 1 / (1 + Math.pow(10, (rating[B] - rating[A]) / 400));
+          var winnerDiff = sa === 1 ? rating[A] - rating[B] : (sa === 0 ? rating[B] - rating[A] : 0);
+          var mov = sa === 0.5 ? 1 : Math.log(Math.abs(va - vb) + 1) * (2.2 / (winnerDiff * 0.001 + 2.2));
+          var delta = K * Math.max(0.5, mov) * (sa - ea);
+          rating[A] += delta; rating[B] -= delta;
+        }
+      }
+    }
+    return rating;
+  }
+
+  /** Hacker-News-style freshness: each day's views decay with age ((age+offset)^gravity). */
+  function hotScore(daily, opts) {
+    opts = opts || {};
+    var g = opts.gravity || 1.8, off = opts.offset || 1, n = daily.length, s = 0;
+    for (var i = 0; i < n; i++) s += (daily[i] || 0) / Math.pow((n - 1 - i) + off, g);
+    return s;
+  }
+
+  /** IMDb weighted rating: WR = v/(v+m)*R + m/(v+m)*C */
+  function bayesianRating(R, v, m, C) { return v / (v + m) * R + m / (v + m) * C; }
+
+  /** Lower bound of the Wilson score interval (Reddit "best"). Returns 0..1. */
+  function wilsonLowerBound(success, n, z) {
+    if (!n) return 0;
+    z = z || 1.96;
+    var p = Math.min(1, success / n), d = 1 + z * z / n;
+    return Math.max(0, (p + z * z / (2 * n) - z * Math.sqrt((p * (1 - p) + z * z / (4 * n)) / n)) / d);
+  }
+
+  /**
+   * Weighted Reciprocal Rank Fusion.
+   * rankings: [{weight, ranks: {id: rank}}]. Score = Σ w / (k + rank). Returns {id: score}.
+   */
+  function reciprocalRankFusion(rankings, k) {
+    var out = {};
+    rankings.forEach(function (r) {
+      Object.keys(r.ranks).forEach(function (id) {
+        out[id] = (out[id] || 0) + (r.weight === undefined ? 1 : r.weight) / (k + r.ranks[id]);
+      });
+    });
+    return out;
+  }
+
+  /** Competition ranks (1,2,2,4) from {id: value}, higher value = better. */
+  function ranksFromScores(scores, precision) {
+    var ids = Object.keys(scores), p = Math.pow(10, precision === undefined ? 2 : precision);
+    ids.sort(function (a, b) { return scores[b] - scores[a]; });
+    var ranks = {}, rank = 0, prev = null;
+    ids.forEach(function (id, i) {
+      var v = Math.round(scores[id] * p);
+      if (v !== prev) { rank = i + 1; prev = v; }
+      ranks[id] = rank;
+    });
+    return ranks;
+  }
+
+
+  var median = function (a) { if (!a.length) return 0; var s = a.slice().sort(function (x, y) { return x - y; }), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+
+  /**
+   * Robust anomaly detection. Each day is compared with the median of the previous `window` days;
+   * the median absolute deviation (MAD) makes it immune to earlier spikes. Returns the flagged days.
+   */
+  function detectAnomalies(daily, opts) {
+    opts = opts || {};
+    var win = opts.window || 7, thr = opts.threshold || 3.5, minVal = opts.minValue === undefined ? 5 : opts.minValue, out = [];
+    for (var i = win; i < daily.length; i++) {
+      var prev = daily.slice(i - win, i), med = median(prev);
+      var mad = median(prev.map(function (v) { return Math.abs(v - med); }));
+      var scale = Math.max(mad / 0.6745, 0.15 * Math.max(1, med), 1);   // floor so flat series don't flag noise
+      var z = (daily[i] - med) / scale, rel = med > 0 ? (daily[i] - med) / med : (daily[i] > 0 ? 1 : 0);
+      if (Math.abs(z) >= thr && Math.abs(rel) >= 0.5 && Math.max(daily[i], med) >= minVal) {
+        out.push({ index: i, value: daily[i], expected: med, z: z, change: rel, type: z > 0 ? 'spike' : 'drop' });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Forecast the next `horizon` days. Day-of-week factors (shrunk toward 1) remove weekly rhythm,
+   * Holt's double exponential smoothing fits level + trend, and the residual spread gives an 80% band.
+   * days: ['YYYYMMDD', ...] aligned with daily (used for weekday seasonality).
+   */
+  function forecast(daily, days, horizon, opts) {
+    opts = opts || {}; horizon = horizon || 7;
+    var n = daily.length, a = opts.alpha || 0.5, b = opts.beta || 0.2;
+    var dow = function (stamp) { return new Date(Date.UTC(+stamp.slice(0, 4), +stamp.slice(4, 6) - 1, +stamp.slice(6, 8))).getUTCDay(); };
+    var mean = daily.reduce(function (t, v) { return t + v; }, 0) / Math.max(1, n);
+    var factor = [1, 1, 1, 1, 1, 1, 1];
+    if (days && days.length === n && n >= 14 && mean > 0) {
+      // detrend with a least-squares line first, so a steady climb is not mistaken for a weekly pattern
+      var sx = 0, sy = 0, sxy = 0, sxx = 0;
+      daily.forEach(function (v, i) { sx += i; sy += v; sxy += i * v; sxx += i * i; });
+      var den = n * sxx - sx * sx, slope = den ? (n * sxy - sx * sy) / den : 0, icpt = (sy - slope * sx) / n;
+      var sums = [0, 0, 0, 0, 0, 0, 0], cnt = [0, 0, 0, 0, 0, 0, 0];
+      days.forEach(function (d, i) { var fit = Math.max(icpt + slope * i, 0.25 * mean), w = dow(d); sums[w] += daily[i] / fit; cnt[w]++; });
+      var raw = sums.map(function (t, w) { return cnt[w] ? t / cnt[w] : 1; }), avg = raw.reduce(function (t, v) { return t + v; }, 0) / 7;
+      factor = raw.map(function (r) { return 1 + 0.5 * (r / (avg || 1) - 1); });
+    }
+    var adj = daily.map(function (v, i) { var f = days && days.length === n ? factor[dow(days[i])] : 1; return f > 0 ? v / f : v; });
+    var level = adj[0] || 0, trend = n > 1 ? (adj[Math.min(n - 1, 6)] - adj[0]) / Math.max(1, Math.min(n - 1, 6)) : 0, sq = 0, k = 0, i;
+    for (i = 1; i < n; i++) {
+      var pred = level + trend, err = adj[i] - pred; sq += err * err; k++;
+      var nl = a * adj[i] + (1 - a) * (level + trend);
+      trend = b * (nl - level) + (1 - b) * trend; level = nl;
+    }
+    var sd = k ? Math.sqrt(sq / k) : 0, pts = [];
+    var last = days && days.length === n ? Date.UTC(+days[n - 1].slice(0, 4), +days[n - 1].slice(4, 6) - 1, +days[n - 1].slice(6, 8)) : null;
+    for (var h = 1; h <= horizon; h++) {
+      var wd = last === null ? 0 : new Date(last + h * 86400000).getUTCDay(), f2 = last === null ? 1 : factor[wd];
+      var base = Math.max(0, (level + trend * h) * f2), band = 1.28 * sd * Math.sqrt(h) * f2;
+      pts.push({ h: h, value: base, lo: Math.max(0, base - band), hi: base + band, dow: wd });
+    }
+    return { points: pts, sd: sd, trendPerDay: trend, level: level, total: pts.reduce(function (t, p) { return t + p.value; }, 0) };
+  }
+
+  return { detectAnomalies: detectAnomalies, forecast: forecast, median: median, pageRank: pageRank, eloLeague: eloLeague, hotScore: hotScore, bayesianRating: bayesianRating,
+    wilsonLowerBound: wilsonLowerBound, reciprocalRankFusion: reciprocalRankFusion, ranksFromScores: ranksFromScores };
+});
+
+</script>
+<script>
+/* ---- inlined from analysis-engine.js (page works as a single file) ---- */
+/**
+ * analysis-engine.js
+ * -----------------
+ * Analysis Ranking System — multi-factor, self-arranging ranking engine.
+ * Independent of any analysis page. Works in the browser and in Node 18+.
+ *
+ * Data (all produced by tracker.js, read from the public counter API):
+ *   <key>                lifetime views
+ *   <key>_YYYYMMDD       views per UTC day         (history for trend maths)
+ *   <key>_sessions       unique sessions
+ *   <key>_engaged        sessions that stayed >= engagedSeconds
+ *
+ * Algorithms (see algorithms.js): PageRank, Elo league, HN-style hot score, IMDb Bayesian
+ * rating, Wilson bound, Reciprocal Rank Fusion.
+ *
+ * Score model (each metric 0-100, then weighted):
+ *   Reach        log-scaled lifetime views, relative to the field leader
+ *   Traction     exponential moving average of daily views (recent days weigh more)
+ *   Momentum     week-over-week growth, Bayesian-smoothed, squashed with tanh (50 = flat)
+ *   Consistency  recency-weighted active days combined with low volatility
+ *   Engagement   Wilson lower bound (95%) of engaged / sessions, IMDb-shrunk toward the field mean
+ *   Authority    PageRank over the site link graph
+ *   Freshness    Hacker-News-style gravity: today's views count far more than last week's
+ *   Elo          daily head-to-head league rating (more views that day = win, margin-of-victory aware)
+ *
+ *   Two methods: 'weighted' (weighted sum) and 'fusion' (weighted Reciprocal Rank Fusion).
+ *
+ *   Small samples are damped toward the field average (confidence = views / (views + K))
+ *   and are never boosted above their raw score, so a brand-new site cannot jump to 1st.
+ *   Ties break on: score > traction > lifetime views > name.
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.NexoraRanking = api;
+})(typeof self !== 'undefined' ? self : this, function (root) {
+  'use strict';
+
+  var NODE = typeof module === 'object' && module.exports;
+  var CFG = NODE ? require('./analysis-config.js') : root.NEXORA_RANKING_CONFIG;
+  var ALG = NODE ? require('./analysis-algorithms.js') : root.NexoraAlgorithms;
+
+  var METRICS = [
+    { id: 'reach',       label: 'Reach',       color: '#22d3ee', hint: 'Lifetime views (log scale)' },
+    { id: 'traction',    label: 'Traction',    color: '#a78bfa', hint: 'Recent daily traffic (moving average)' },
+    { id: 'momentum',    label: 'Momentum',    color: '#3ed598', hint: 'This week vs last week' },
+    { id: 'consistency', label: 'Consistency', color: '#ffb74d', hint: 'Steady daily activity' },
+    { id: 'engagement',  label: 'Engagement',  color: '#f472b6', hint: 'Visitors who stay 30s+ (Wilson + Bayesian)' },
+    { id: 'authority',   label: 'Authority',   color: '#60a5fa', hint: 'PageRank from site links' },
+    { id: 'freshness',   label: 'Freshness',   color: '#fb923c', hint: 'Hot score: recent views decay slowly' },
+    { id: 'elo',         label: 'Elo',         color: '#e879f9', hint: 'Daily head-to-head rating' }
+  ];
+
+  /* ---------- small helpers ---------- */
+  var sum = function (a) { return a.reduce(function (t, v) { return t + v; }, 0); };
+  var round = function (v, d) { var p = Math.pow(10, d || 0); return Math.round(v * p) / p; };
+  var clamp = function (v, lo, hi) { return Math.min(hi, Math.max(lo, v)); };
+  function ordinal(n) {
+    if (!n) return '—';
+    var s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+  function dayStamp(ms) { return new Date(ms).toISOString().slice(0, 10).replace(/-/g, ''); }
+  function lastDays(n, now) {
+    var a = [];
+    for (var i = n - 1; i >= 0; i--) a.push(dayStamp(now - i * 86400000));
+    return a;
+  }
+  function makeStorage() {
+    try {
+      if (root.localStorage) {
+        root.localStorage.setItem('__nx', '1'); root.localStorage.removeItem('__nx');
+        return root.localStorage;
+      }
+    } catch (e) { /* fall through */ }
+    var mem = {};
+    return {
+      getItem: function (k) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+      setItem: function (k, v) { mem[k] = String(v); },
+      removeItem: function (k) { delete mem[k]; }
+    };
+  }
+  var STORE = makeStorage();
+  var CACHE_KEY = 'nexora_rank_cache_v2', HISTORY_KEY = 'nexora_rank_history_v2';
+  function readJSON(k, fb) { try { return JSON.parse(STORE.getItem(k)) || fb; } catch (e) { return fb; } }
+  function writeJSON(k, v) { try { STORE.setItem(k, JSON.stringify(v)); } catch (e) { /* quota */ } }
+
+  /* ---------- data layer ---------- */
+  async function fetchCount(cfg, key) {
+    var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, cfg.timeoutMs || 8000);
+    try {
+      var res = await fetch(cfg.api + '/get/' + encodeURIComponent(key), { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+      if (res.status === 404) return 0;           // key not created yet = no hits
+      if (!res.ok) return null;                   // service problem
+      var d = await res.json();
+      if (d && d.value !== undefined && d.value !== null) return Number(d.value) || 0;
+      return d && d.error ? 0 : null;
+    } catch (e) { return null; } finally { clearTimeout(timer); }
+  }
+
+  async function pool(tasks, limit) {
+    var out = new Array(tasks.length), i = 0;
+    async function worker() { while (i < tasks.length) { var n = i++; out[n] = await tasks[n](); } }
+    var workers = [];
+    for (var w = 0; w < Math.min(limit, tasks.length); w++) workers.push(worker());
+    await Promise.all(workers);
+    return out;
+  }
+
+  /**
+   * Fetch raw metrics for every configured site.
+   * Past days never change, so they are cached permanently; only today + totals refetch.
+   */
+  async function collectMetrics(cfg, opts) {
+    cfg = cfg || CFG; opts = opts || {};
+    var now = opts.now || Date.now();
+    var days = lastDays(Math.max(14, cfg.historyDays || 14), now);
+    var today = days[days.length - 1];
+    var cache = readJSON(CACHE_KEY, {});
+    var anyFailed = false, anyStale = false;
+
+    async function get(key, permanent) {
+      if (permanent && cache[key] !== undefined) return { v: cache[key], stale: false };
+      var v = await fetchCount(cfg, key);
+      if (v === null) {
+        anyFailed = true;
+        if (cache[key] !== undefined) { anyStale = true; return { v: cache[key], stale: true }; }
+        return { v: null, stale: false };
+      }
+      cache[key] = v;
+      return { v: v, stale: false };
+    }
+
+    var plan = [];
+    cfg.sites.forEach(function (s) {
+      plan.push({ s: s, t: 'total', key: s.key, perm: false });
+      plan.push({ s: s, t: 'sessions', key: s.key + '_sessions', perm: false });
+      plan.push({ s: s, t: 'engaged', key: s.key + '_engaged', perm: false });
+      days.forEach(function (d) { plan.push({ s: s, t: 'day', d: d, key: s.key + '_' + d, perm: d !== today }); });
+    });
+    var results = await pool(plan.map(function (p) { return function () { return get(p.key, p.perm); }; }), cfg.concurrency || 6);
+
+    var bySite = {};
+    cfg.sites.forEach(function (s) {
+      bySite[s.id] = { id: s.id, name: s.name, url: s.url, total: null, sessions: 0, engaged: 0, days: days, daily: days.map(function () { return 0; }), stale: false };
+    });
+    plan.forEach(function (p, i) {
+      var m = bySite[p.s.id], r = results[i];
+      if (r.stale) m.stale = true;
+      if (p.t === 'total') m.total = r.v;
+      else if (p.t === 'sessions') m.sessions = r.v || 0;
+      else if (p.t === 'engaged') m.engaged = r.v || 0;
+      else m.daily[days.indexOf(p.d)] = r.v || 0;
+    });
+    // trim cache to what we still need
+    var keep = {};
+    cfg.sites.forEach(function (s) {
+      [s.key, s.key + '_sessions', s.key + '_engaged'].concat(days.map(function (d) { return s.key + '_' + d; }))
+        .forEach(function (k) { if (cache[k] !== undefined) keep[k] = cache[k]; });
+    });
+    writeJSON(CACHE_KEY, keep);
+
+    var list = cfg.sites.map(function (s) {
+      var m = bySite[s.id];
+      m.unavailable = m.total === null;
+      if (m.total === null) m.total = 0;
+      return m;
+    });
+    var status = list.every(function (m) { return m.unavailable; }) ? 'offline'
+      : (anyFailed ? (anyStale ? 'cached' : 'partial') : 'live');
+    return { metrics: list, status: status, at: now };
+  }
+
+  /* ---------- scoring ---------- */
+  function features(m, cfg) {
+    var d = m.daily, n = d.length, alpha = cfg.emaAlpha || 0.35;
+    var recent = sum(d.slice(-7)), prior = sum(d.slice(-14, -7));
+    var ema = 0;
+    d.forEach(function (v, i) { ema = i === 0 ? v : alpha * v + (1 - alpha) * ema; });
+    var wSum = 0, wActive = 0;
+    d.forEach(function (v, i) { var w = Math.pow(0.9, n - 1 - i); wSum += w; if (v > 0) wActive += w; });
+    var mean = sum(d) / n;
+    var sd = Math.sqrt(sum(d.map(function (v) { return (v - mean) * (v - mean); })) / n);
+    var cv = mean > 0 ? sd / mean : 0;
+    var consistency = mean > 0 ? 100 * (0.6 * (wActive / wSum) + 0.4 / (1 + cv)) : 0;
+    var momentum = (recent + prior) === 0 ? 0
+      : 50 + 50 * Math.tanh(Math.log((recent + 2) / (prior + 2)));
+    var engagement = m.sessions > 0 ? 100 * ALG.wilsonLowerBound(m.engaged, m.sessions) : null;
+    return { recent: recent, prior: prior, ema: ema, consistency: consistency, momentum: momentum, engagement: engagement };
+  }
+
+  function trendLabel(f) {
+    if (f.recent + f.prior === 0) return 'No data';
+    if (f.momentum >= 70) return 'Surging';
+    if (f.momentum >= 55) return 'Rising';
+    if (f.momentum >= 45) return 'Steady';
+    if (f.momentum >= 25) return 'Cooling';
+    return 'Fading';
+  }
+
+  /**
+   * Pure function: raw metrics + weights  ->  ranked rows. Safe to call on every slider move.
+   * opts.method: 'weighted' | 'fusion'
+   */
+  function scoreSites(metrics, weights, opts) {
+    opts = opts || {};
+    var cfg = Object.assign({}, CFG, opts);
+    var method = cfg.method === 'fusion' ? 'fusion' : 'weighted';
+    var live = metrics.filter(function (m) { return !m.unavailable; });
+    var down = metrics.filter(function (m) { return m.unavailable; });
+    var ids = live.map(function (m) { return m.id; });
+
+    var feats = live.map(function (m) { return features(m, cfg); });
+    var maxTotal = Math.max.apply(null, [0].concat(live.map(function (m) { return m.total; })));
+    var maxEma = Math.max.apply(null, [0].concat(feats.map(function (f) { return f.ema; })));
+    var hasEngagement = feats.some(function (f) { return f.engagement !== null; });
+
+    // --- cross-site algorithms ---
+    var pr = ALG.pageRank(ids, cfg.links || []);
+    var maxPr = Math.max.apply(null, [0].concat(ids.map(function (id) { return pr[id]; })));
+    var series = {}; live.forEach(function (m) { series[m.id] = m.daily; });
+    var elo = ALG.eloLeague(series);
+    var eloMean = ids.length ? ids.reduce(function (t, id) { return t + elo[id]; }, 0) / ids.length : 1500;
+    var hot = {}; live.forEach(function (m) { hot[m.id] = ALG.hotScore(m.daily, { gravity: cfg.hotGravity }); });
+    var maxHot = Math.max.apply(null, [0].concat(ids.map(function (id) { return hot[id]; })));
+    // IMDb-style shrink of engagement rate toward the field mean
+    var rates = live.filter(function (m) { return m.sessions > 0; }).map(function (m) { return m.engaged / m.sessions; });
+    var meanRate = rates.length ? sum(rates) / rates.length : 0;
+
+    var w = {}, wTotal = 0;
+    METRICS.forEach(function (k) {
+      var v = Math.max(0, Number(weights && weights[k.id]) || 0);
+      if (k.id === 'engagement' && !hasEngagement) v = 0;
+      w[k.id] = v; wTotal += v;
+    });
+    if (wTotal === 0) { METRICS.forEach(function (k) { w[k.id] = k.id === 'reach' ? 1 : 0; }); wTotal = 1; }
+    METRICS.forEach(function (k) { w[k.id] = w[k.id] / wTotal; });
+
+    var rows = live.map(function (m, i) {
+      var f = feats[i], eng = f.engagement;
+      if (eng !== null) {
+        var wl = ALG.wilsonLowerBound(m.engaged, m.sessions);
+        eng = 100 * ALG.bayesianRating(wl, m.sessions, cfg.bayesM || 20, meanRate * 0.7);
+      }
+      var scores = {
+        reach: maxTotal > 0 ? 100 * Math.log1p(m.total) / Math.log1p(maxTotal) : 0,
+        traction: maxEma > 0 ? 100 * Math.log1p(f.ema) / Math.log1p(maxEma) : 0,
+        momentum: f.momentum,
+        consistency: f.consistency,
+        engagement: eng === null ? 0 : eng,
+        authority: maxPr > 0 ? 100 * pr[m.id] / maxPr : 0,
+        freshness: maxHot > 0 ? 100 * Math.log1p(hot[m.id]) / Math.log1p(maxHot) : 0,
+        elo: 100 / (1 + Math.pow(10, (eloMean - elo[m.id]) / 400))
+      };
+      var composite = 0;
+      METRICS.forEach(function (k) { composite += w[k.id] * scores[k.id]; });
+      return { m: m, f: f, scores: scores, composite: composite, elo: elo[m.id], pr: pr[m.id], hot: hot[m.id] };
+    });
+
+    // --- per-metric rankings + weighted Reciprocal Rank Fusion ---
+    var kRRF = Math.max(2, rows.length);
+    var rankings = [], metricRanks = {};
+    METRICS.forEach(function (k) {
+      var sc = {}; rows.forEach(function (r) { sc[r.m.id] = r.scores[k.id]; });
+      var rk = ALG.ranksFromScores(sc, 1);
+      metricRanks[k.id] = rk;
+      if (w[k.id] > 0) rankings.push({ weight: w[k.id], ranks: rk });
+    });
+    var rrf = ALG.reciprocalRankFusion(rankings, kRRF);
+    var rrfMax = sum(rankings.map(function (r) { return r.weight / (kRRF + 1); })) || 1;
+    rows.forEach(function (r) {
+      r.fusion = 100 * (rrf[r.m.id] || 0) / rrfMax;
+      r.base = method === 'fusion' ? r.fusion : r.composite;
+    });
+
+    var fieldMean = rows.length ? sum(rows.map(function (r) { return r.base; })) / rows.length : 0;
+    var K = cfg.confidenceK || 30;
+    rows.forEach(function (r) {
+      r.confidence = r.m.total / (r.m.total + K);
+      var shrunk = fieldMean * (1 - r.confidence) + r.base * r.confidence;
+      r.score = Math.min(r.base, shrunk); // small samples can be damped, never boosted
+      var scale = r.base > 0 ? r.score / r.base : 0;
+      r.contrib = {};
+      METRICS.forEach(function (k) {
+        var part = method === 'fusion'
+          ? 100 * (w[k.id] / (kRRF + metricRanks[k.id][r.m.id])) / rrfMax
+          : w[k.id] * r.scores[k.id];
+        r.contrib[k.id] = part * scale;
+      });
+    });
+
+    rows.sort(function (a, b) {
+      return (b.score - a.score) || (b.f.ema - a.f.ema) || (b.m.total - a.m.total) || a.m.name.localeCompare(b.m.name);
+    });
+
+    var out = [], rank = 0;
+    rows.forEach(function (r, i) {
+      var prev = rows[i - 1], next = rows[i + 1];
+      var tie = prev && round(prev.score, 2) === round(r.score, 2) && round(prev.f.ema, 3) === round(r.f.ema, 3) && prev.m.total === r.m.total;
+      if (!tie) rank = i + 1;
+      var active = METRICS.filter(function (k) { return w[k.id] > 0; });
+      var best = active.slice().sort(function (a, b) { return r.scores[b.id] - r.scores[a.id]; })[0];
+      var worst = active.slice().sort(function (a, b) { return r.scores[a.id] - r.scores[b.id]; })[0];
+      var gapUp = prev ? prev.score - r.score : null;
+      var mr = {}; METRICS.forEach(function (k) { mr[k.id] = metricRanks[k.id][r.m.id]; });
+      out.push({
+        id: r.m.id, name: r.m.name, url: r.m.url, rank: rank, ordinal: ordinal(rank),
+        score: round(r.score, 1), rawScore: round(r.base, 1),
+        weightedScore: round(r.composite, 1), fusionScore: round(r.fusion, 1), method: method,
+        confidence: round(r.confidence, 2),
+        scores: Object.keys(r.scores).reduce(function (o, k) { o[k] = round(r.scores[k], 1); return o; }, {}),
+        contrib: Object.keys(r.contrib).reduce(function (o, k) { o[k] = round(r.contrib[k], 2); return o; }, {}),
+        metricRanks: mr, eloRating: round(r.elo, 0), pageRank: round(r.pr, 4), hot: round(r.hot, 2),
+        total: r.m.total, recent7: r.f.recent, prior7: r.f.prior, ema: round(r.f.ema, 2),
+        sessions: r.m.sessions, engaged: r.m.engaged,
+        daily: r.m.daily, days: r.m.days,
+        trend: trendLabel(r.f),
+        strength: best ? best.label : null, weakness: worst ? worst.label : null,
+        gapUp: gapUp === null ? null : round(gapUp, 1),
+        leadOver: next ? round(r.score - next.score, 1) : null,
+        catchUp7: prev ? Math.max(0, prev.f.recent - r.f.recent) + 1 : 0,
+        closeRace: (gapUp !== null && gapUp < (cfg.closeRaceGap || 2)) || (next && r.score - next.score < (cfg.closeRaceGap || 2)) || false,
+        stale: !!r.m.stale, unavailable: false, movement: null
+      });
+    });
+    down.forEach(function (m) {
+      out.push({ id: m.id, name: m.name, url: m.url, rank: null, ordinal: '—', score: null, rawScore: null, weightedScore: null, fusionScore: null,
+        method: method, confidence: 0, scores: {}, contrib: {}, metricRanks: {}, eloRating: null, pageRank: null, hot: 0,
+        total: 0, recent7: 0, prior7: 0, ema: 0, sessions: 0, engaged: 0, daily: m.daily, days: m.days,
+        trend: 'Unavailable', strength: null, weakness: null, gapUp: null, leadOver: null, catchUp7: 0, closeRace: false,
+        stale: false, unavailable: true, movement: null });
+    });
+    return { rows: out, weights: w, hasEngagement: hasEngagement, method: method };
+  }
+
+  /* ---------- rank movement (persisted in this browser) ---------- */
+  function applyMovement(rows, now, minAgeMs) {
+    now = now || Date.now(); minAgeMs = minAgeMs || 600000;
+    var hist = readJSON(HISTORY_KEY, []);
+    var ref = null;
+    for (var i = hist.length - 1; i >= 0; i--) { if (now - hist[i].t >= minAgeMs) { ref = hist[i]; break; } }
+    rows.forEach(function (r) {
+      if (r.rank && ref && ref.ranks[r.id]) r.movement = ref.ranks[r.id] - r.rank;
+      else r.movement = null;
+    });
+    var ranks = {};
+    rows.forEach(function (r) { if (r.rank) ranks[r.id] = r.rank; });
+    if (Object.keys(ranks).length && (!hist.length || now - hist[hist.length - 1].t >= minAgeMs)) {
+      hist.push({ t: now, ranks: ranks });
+      writeJSON(HISTORY_KEY, hist.slice(-100));
+    }
+    return rows;
+  }
+
+  /**
+   * Read many counters at once (used by the workspace for chatbot / audience / vitals data).
+   * opts.permanent = { key: true } marks keys that can never change again (past days) so they are cached for good.
+   * Returns { values: {key: number|null}, failed: boolean }.
+   */
+  var EXT_CACHE = 'nexora_ext_cache_v1';
+  async function fetchMany(keys, opts) {
+    opts = opts || {};
+    var cfg = Object.assign({}, CFG, opts.config || {}), cache = readJSON(EXT_CACHE, {}), perm = opts.permanent || {}, failed = false;
+    var tasks = keys.map(function (k) {
+      return async function () {
+        if (perm[k] && cache[k] !== undefined) return cache[k];
+        var v = await fetchCount(cfg, k);
+        if (v === null) { failed = true; return cache[k] !== undefined ? cache[k] : null; }
+        cache[k] = v; return v;
+      };
+    });
+    var vals = await pool(tasks, cfg.concurrency || 6), out = {};
+    keys.forEach(function (k, i) { out[k] = vals[i]; });
+    writeJSON(EXT_CACHE, cache);
+    return { values: out, failed: failed };
+  }
+
+  /** One call: fetch -> score -> movement. */
+  async function compute(opts) {
+    opts = opts || {};
+    var cfg = Object.assign({}, CFG, opts.config || {});
+    var data = await collectMetrics(cfg, opts);
+    var res = scoreSites(data.metrics, opts.weights || cfg.weights, Object.assign({}, cfg, opts.method ? { method: opts.method } : {}));
+    applyMovement(res.rows, data.at);
+    return { rows: res.rows, weights: res.weights, hasEngagement: res.hasEngagement, method: res.method, metrics: data.metrics, status: data.status, at: data.at };
+  }
+
+  function toCSV(rows) {
+    var head = ['rank', 'site', 'score', 'confidence', 'total_views', 'views_7d', 'views_prev_7d', 'trend', 'elo_rating', 'pagerank'].concat(METRICS.map(function (k) { return k.id; }));
+    var lines = [head.join(',')];
+    rows.forEach(function (r) {
+      lines.push([r.rank || '', '"' + r.name + '"', r.score === null ? '' : r.score, r.confidence, r.total, r.recent7, r.prior7, r.trend,
+        r.eloRating === null ? '' : r.eloRating, r.pageRank === null ? '' : r.pageRank].concat(METRICS.map(function (k) { return r.scores[k.id] === undefined ? '' : r.scores[k.id]; })).join(','));
+    });
+    return lines.join('\n');
+  }
+
+  return { config: CFG, METRICS: METRICS, ordinal: ordinal, collectMetrics: collectMetrics, scoreSites: scoreSites,
+    applyMovement: applyMovement, compute: compute, toCSV: toCSV, dayStamp: dayStamp, lastDays: lastDays, fetchMany: fetchMany };
+});
+
+</script>
+<script>
+/* ---- inlined from analysis-flags.js (page works as a single file) ---- */
+/**
+ * analysis-flags.js
+ * -------------------
+ * Tiny feature-flag SDK (the idea behind LaunchDarkly / Meta Gatekeeper / Google Experiments):
+ * deterministic percentage rollouts, per-environment targeting, instant kill switch.
+ * Works in the browser and in Node. No dependencies.
+ *
+ *   const flags = AnalysisFlags.create([
+ *     { key: 'new-chat-ui', on: true, rollout: 25, env: ['prod'] }
+ *   ], { env: 'prod' });
+ *   if (flags.isOn('new-chat-ui')) { ... }
+ *
+ * The same visitor always lands in the same bucket, so a 25% rollout is stable
+ * across page loads and grows monotonically when you raise the percentage.
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.AnalysisFlags = api;
+})(typeof self !== 'undefined' ? self : this, function (root) {
+  'use strict';
+
+  function hash(str) {                       // FNV-1a, 32-bit
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return h >>> 0;
+  }
+  function bucket(visitor, key) { return hash(key + ':' + visitor) % 100; }
+
+  function evaluate(flag, visitor, env) {
+    if (!flag || !flag.on) return false;                                   // kill switch
+    if (flag.env && flag.env.length && env && flag.env.indexOf(env) < 0) return false;
+    if (flag.allow && flag.allow.indexOf(visitor) >= 0) return true;       // explicit allow-list
+    return bucket(visitor, flag.key) < Math.max(0, Math.min(100, Number(flag.rollout) || 0));
+  }
+
+  function visitorId() {
+    try {
+      var k = 'tg_visitor_id', v = root.localStorage.getItem(k);
+      if (!v) { v = 'v_' + Math.random().toString(36).slice(2, 12); root.localStorage.setItem(k, v); }
+      return v;
+    } catch (e) { return 'v_anonymous'; }
+  }
+
+  function create(flags, opts) {
+    opts = opts || {};
+    var id = opts.visitor || visitorId(), env = opts.env || null, map = {};
+    (flags || []).forEach(function (f) { map[f.key] = f; });
+    return {
+      visitor: id,
+      isOn: function (key, fallback) { return map[key] ? evaluate(map[key], id, env) : !!fallback; },
+      all: function () { var o = {}; Object.keys(map).forEach(function (k) { o[k] = evaluate(map[k], id, env); }); return o; },
+      bucket: function (key) { return bucket(id, key); }
+    };
+  }
+
+  return { hash: hash, bucket: bucket, evaluate: evaluate, create: create, visitorId: visitorId };
+});
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var R = window.NexoraRanking, CFG = R.config, FL = window.AnalysisFlags, ALG = window.NexoraAlgorithms;
+  var KEY = 'tg_workspace_v1', TKEY = 'nexora_rank_theme_v1', DAY = 86400000;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s === undefined || s === null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var uid = function () { return Math.random().toString(36).slice(2, 9); };
+  var num = function (v) { v = Number(v); return isFinite(v) ? v : 0; };
+  var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+  var fmt = function (n) { return typeof n === 'number' ? n.toLocaleString() : '—'; };
+  var pct = function (v, d) { return (v * 100).toFixed(d || 0) + '%'; };
+  var isoDay = function (ms) { return new Date(ms).toISOString().slice(0, 10); };
+  var COLOR = { g: 'var(--ok)', a: 'var(--warn)', r: 'var(--bad)' };
+
+  /* ================= data ================= */
+  function seed() {
+    var today = Date.now();
+    return {
+      v: 1, sample: true, slo: 99.5, uptime: {},
+      okrs: [
+        { id: uid(), objective: 'Grow Nexora AI adoption', owner: 'You', quarter: 'Q4 2026', krs: [
+          { id: uid(), text: 'Nexora AI weekly views', type: 'auto', metric: 'views7', site: 'nexora', start: 0, target: 500, conf: 7 },
+          { id: uid(), text: 'Engagement rate (visits staying 30s+)', type: 'auto', metric: 'engRate', site: 'nexora', start: 0, target: 50, conf: 6 },
+          { id: uid(), text: 'Ship streaming responses to everyone', type: 'manual', start: 0, target: 100, current: 30, conf: 8 }] },
+        { id: uid(), objective: 'Make the dashboard the daily home base', owner: 'You', quarter: 'Q4 2026', krs: [
+          { id: uid(), text: 'Dashboard ranking score', type: 'auto', metric: 'score', site: 'dashboard', start: 0, target: 80, conf: 5 },
+          { id: uid(), text: 'Discipline weekly views', type: 'auto', metric: 'views7', site: 'discipline', start: 0, target: 300, conf: 6 }] }
+      ],
+      roadmap: [
+        { id: uid(), title: 'Streaming chatbot responses', product: 'nexora', lane: 'now', reach: 800, impact: 2, confidence: 80, effort: 3 },
+        { id: uid(), title: 'Supabase login with Google SSO', product: 'platform', lane: 'now', reach: 500, impact: 1, confidence: 80, effort: 2 },
+        { id: uid(), title: 'Discipline streak reminders', product: 'discipline', lane: 'next', reach: 300, impact: 2, confidence: 50, effort: 4 },
+        { id: uid(), title: 'Shareable ranking snapshots', product: 'dashboard', lane: 'next', reach: 200, impact: 1, confidence: 80, effort: 1 },
+        { id: uid(), title: 'Voice input in Nexora AI', product: 'nexora', lane: 'later', reach: 600, impact: 3, confidence: 50, effort: 8 },
+        { id: uid(), title: 'Analysis ranking page', product: 'dashboard', lane: 'done', reach: 400, impact: 2, confidence: 100, effort: 3 }
+      ],
+      sprint: { name: 'Sprint 3', start: isoDay(today - 3 * DAY), days: 10, committed: 30, done: [5, 4, 6, null, null, null, null, null, null, null] },
+      sprints: [{ name: 'Sprint 1', velocity: 21 }, { name: 'Sprint 2', velocity: 26 }],
+      experiments: [
+        { id: uid(), name: 'Chat welcome message', metric: 'Started a conversation', variants: [{ name: 'A · Short (control)', n: 1200, c: 156 }, { name: 'B · Detailed', n: 1180, c: 190 }] }
+      ],
+      flags: [
+        { key: 'streaming-responses', desc: 'Stream chatbot replies token by token', on: true, rollout: 25, env: ['prod'], owner: 'You' },
+        { key: 'bento-dashboard', desc: 'New bento dashboard layout', on: true, rollout: 100, env: ['prod', 'dev'], owner: 'You' },
+        { key: 'voice-input', desc: 'Voice input in Nexora AI', on: false, rollout: 0, env: ['dev'], owner: 'You' }
+      ],
+      decisions: [
+        { id: uid(), date: isoDay(today - 20 * DAY), title: 'Use free public counters instead of a backend', context: 'GitHub Pages has no server, but we still need view counts and rankings.', decision: 'Use a public counter API with a local cache; revisit when traffic outgrows it.', status: 'Accepted' }
+      ],
+      risks: [
+        { id: uid(), title: 'Public counter service goes down', likelihood: 3, impact: 3, owner: 'You', mitigation: 'Cached values and a visible "Cached data" status.', status: 'Open' },
+        { id: uid(), title: 'Supabase keys exposed in client code', likelihood: 2, impact: 4, owner: 'You', mitigation: 'Row Level Security on every table; anon key only.', status: 'Open' }
+      ]
+    };
+  }
+  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return s; } catch (e) {} return seed(); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  var DEFAULT_RELEASES = [
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Chatbot analytics for Nexora AI",
+    "notes": "Conversations, messages, satisfaction (thumbs), error rate, reply latency percentiles, depth, topics and a chatbot health score."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Audience, retention and funnels",
+    "notes": "Traffic sources, devices, new vs returning visitors, day-1 and day-7 retention and custom event funnels."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "improvement",
+    "title": "Core Web Vitals and JavaScript error tracking",
+    "notes": "Per-site loading, layout-shift and responsiveness verdicts plus error rates in the Reliability tab."
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-10-19",
+    "type": "improvement",
+    "title": "Alerts to Discord, Slack and Telegram",
+    "notes": "Send alerts to your chat apps, and export the weekly report as Markdown or PDF."
+  },
+  {
+    "version": "2.0.0",
+    "date": "2026-10-19",
+    "type": "feature",
+    "title": "Insights, alerts and status page",
+    "notes": "Seven-day forecasts, anomaly detection and a status page."
+  },
+  {
+    "version": "1.5.0",
+    "date": "2026-10-17",
+    "type": "feature",
+    "title": "Workspace: OKRs, RICE roadmap, sprints, experiments and feature flags",
+    "notes": "Product and project management tools in one page."
+  },
+  {
+    "version": "1.0.0",
+    "date": "2026-10-16",
+    "type": "feature",
+    "title": "Ranking system",
+    "notes": "Multi-factor ranking using PageRank, Elo, Wilson, Bayesian and rank-fusion methods."
+  }
+];
+  function norm(o) { o.activity = o.activity || []; o.alertState = o.alertState || {}; o.alertLog = o.alertLog || []; o.notify = !!o.notify; o.demo = !!o.demo; o.funnels = o.funnels || {}; o.channels = o.channels || {}; o.supabase = o.supabase || { url: '', key: '' }; o.releases = o.releases || DEFAULT_RELEASES.slice(); return o; }
+  var S = norm(load()); save();
+  function logAct(text, kind) { S.activity.unshift({ t: Date.now(), text: text, kind: kind || 'info' }); S.activity = S.activity.slice(0, 200); }
+  var D = { rows: [], status: 'connecting', at: null };
+  function setPath(path, val) {
+    var p = path.split('.'), o = S;
+    for (var i = 0; i < p.length - 1; i++) o = o[p[i]];
+    o[p[p.length - 1]] = val;
+  }
+  var row = function (id) { return D.rows.filter(function (r) { return r.id === id; })[0]; };
+  var siteName = function (id) { var r = row(id); if (r) return r.name; var s = CFG.sites.filter(function (x) { return x.id === id; })[0]; return s ? s.name : id; };
+
+  /* ================= metrics ================= */
+  function autoVal(kr) {
+    if (KRM[kr.metric]) { var cs = chatStats(EXT.chat); return cs ? KRM[kr.metric][1](cs) : null; }
+    var r = row(kr.site); if (!r || r.unavailable) return null;
+    switch (kr.metric) {
+      case 'views7': return r.recent7; case 'views': return r.total; case 'sessions': return r.sessions;
+      case 'engRate': return r.sessions ? Math.round(r.engaged / r.sessions * 100) : 0;
+      case 'score': return r.score;
+    }
+    return null;
+  }
+  var krCur = function (kr) { return kr.type === 'auto' ? autoVal(kr) : num(kr.current); };
+  function krProg(kr) {
+    var c = krCur(kr); if (c === null) return 0;
+    var span = num(kr.target) - num(kr.start);
+    if (!span) return c >= num(kr.target) ? 1 : 0;
+    return clamp((c - num(kr.start)) / span, 0, 1);
+  }
+  var objProg = function (o) { return o.krs.length ? o.krs.reduce(function (t, k) { return t + krProg(k); }, 0) / o.krs.length : 0; };
+  var grade = function (p) { return p >= .7 ? 'g' : p >= .4 ? 'a' : 'r'; };   // Google OKR convention: 0.7 = good
+  var rice = function (it) { return num(it.effort) > 0 ? num(it.reach) * num(it.impact) * (num(it.confidence) / 100) / num(it.effort) : 0; };
+  function quadrant(it) {
+    var hi = num(it.impact) >= 1, lo = num(it.effort) <= 4;
+    return hi && lo ? ['Quick win', 'g'] : hi ? ['Big bet', 'b'] : lo ? ['Fill-in', ''] : ['Money pit', 'r'];
+  }
+  function pctile(a, p) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; }); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; }
+  function rel(id) {
+    var a = (S.uptime[id] || []).slice(-200), n = a.length, ok = a.filter(function (x) { return x.ok; }).length;
+    var ms = a.filter(function (x) { return x.ok; }).map(function (x) { return x.ms; });
+    var allowed = (1 - S.slo / 100) * n, fails = n - ok;
+    var left = allowed > 0 ? clamp(1 - fails / allowed, 0, 1) : (fails ? 0 : 1);
+    return { n: n, ok: ok, avail: n ? ok / n : null, p50: pctile(ms, .5), p95: pctile(ms, .95), budget: left, fails: fails, series: a };
+  }
+  function health(r) {
+    var reasons = [], st = 'green', rl = rel(r.id);
+    function bump(level, why) { reasons.push(why); if (level === 'red' || (level === 'amber' && st === 'green')) st = level; }
+    if (r.unavailable) bump('red', 'Traffic counter unreachable');
+    else {
+      if (r.trend === 'Fading') bump('red', 'Traffic is fading week over week');
+      else if (r.trend === 'Cooling') bump('amber', 'Traffic is cooling');
+      if (r.recent7 === 0) bump('amber', 'No views in the last 7 days');
+      if (r.score !== null && r.score < 50) bump('amber', 'Ranking score below 50');
+      if (r.confidence < .3) bump('amber', 'Low data confidence');
+    }
+    if (rl.n >= 3) {
+      if (rl.avail < .95) bump('red', 'Availability ' + pct(rl.avail, 1) + ' is under 95%');
+      else if (rl.avail * 100 < S.slo) bump('amber', 'Availability ' + pct(rl.avail, 1) + ' misses the ' + S.slo + '% SLO');
+    }
+    if (!reasons.length) reasons.push('All signals healthy');
+    return { st: st, reasons: reasons };
+  }
+
+  /* ================= experiments maths ================= */
+  function normCdf(z) { var t = 1 / (1 + .2316419 * Math.abs(z)), d = .3989423 * Math.exp(-z * z / 2), p = d * t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
+  function prng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function expStats(e) {
+    var v = e.variants.map(function (x) { var n = Math.max(0, num(x.n)), c = clamp(num(x.c), 0, n); return { name: x.name, n: n, c: c, p: n ? c / n : 0 }; });
+    var a = v[0]; if (!a) return { v: [], decision: 'Add at least two variants.', tone: 'a' };
+    v.forEach(function (x, i) {
+      if (!i) return;
+      var pp = (a.c + x.c) / Math.max(1, a.n + x.n), se = Math.sqrt(pp * (1 - pp) * (1 / Math.max(1, a.n) + 1 / Math.max(1, x.n))) || 1e-9;
+      x.pv = 2 * (1 - normCdf(Math.abs((x.p - a.p) / se)));
+      x.lift = a.p ? (x.p - a.p) / a.p : null;
+      var sd = Math.sqrt(a.p * (1 - a.p) / Math.max(1, a.n) + x.p * (1 - x.p) / Math.max(1, x.n));
+      x.ci = [x.p - a.p - 1.96 * sd, x.p - a.p + 1.96 * sd];
+    });
+    var rnd = prng(42), gauss = function () { return Math.sqrt(-2 * Math.log(rnd() || 1e-9)) * Math.cos(2 * Math.PI * rnd()); }, wins = v.map(function () { return 0; }), D_ = 4000;
+    for (var d = 0; d < D_; d++) {
+      var best = 0, bv = -1;
+      v.forEach(function (x, i) { var A = x.c + 1, B = x.n - x.c + 1, m = A / (A + B), sd = Math.sqrt(A * B / ((A + B) * (A + B) * (A + B + 1))), s = m + sd * gauss(); if (s > bv) { bv = s; best = i; } });
+      wins[best]++;
+    }
+    v.forEach(function (x, i) { x.best = wins[i] / D_; });
+    var base = a.p > 0 ? a.p : .05, need = Math.ceil(16 * base * (1 - base) / Math.pow(base * .1, 2));
+    var short = Math.max.apply(null, v.map(function (x) { return need - x.n; }));
+    var alpha = .05 / Math.max(1, v.length - 1), sig = v.slice(1).filter(function (x) { return x.pv < alpha; }), decision, tone;
+    if (short > 0) { decision = 'Keep running — roughly ' + fmt(short) + ' more visitors per variant for 80% power to detect a 10% relative lift.'; tone = 'a'; }
+    else if (sig.length) {
+      var w = sig.sort(function (x, y) { return y.p - x.p; })[0];
+      if (w.p > a.p) { decision = 'Ship “' + w.name + '” — statistically significant (p = ' + w.pv.toFixed(3) + ').'; tone = 'g'; }
+      else { decision = 'Keep the control — the variant is significantly worse.'; tone = 'r'; }
+    } else { decision = 'No significant difference. Keep the control or test a bolder change.'; tone = 'a'; }
+    return { v: v, need: need, decision: decision, tone: tone };
+  }
+
+  /* ================= sprint maths ================= */
+  function sprintStats(sp) {
+    var cum = 0, last = -1;
+    sp.done.forEach(function (d, i) { if (d !== null && d !== '' && d !== undefined) { cum += num(d); last = i; } });
+    var el = last + 1, vel = el ? cum / el : 0, rem = Math.max(0, num(sp.committed) - cum), eta = vel > 0 ? el + rem / vel : null;
+    var st = rem <= 0 ? ['Complete', 'g'] : el === 0 ? ['Not started', ''] : (eta !== null && eta <= sp.days ? ['On track', 'g'] : ['At risk', 'r']);
+    return { cum: cum, last: last, el: el, vel: vel, rem: rem, eta: eta, st: st };
+  }
+
+  /* ================= UI helpers ================= */
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('on'); }, 2200); }
+  function ring(p, label, size, color) { return '<div class="ring" style="--p:' + Math.round(p * 100) + ';--s:' + (size || 64) + 'px;--k:' + (color || 'var(--c1)') + '"><b>' + label + '</b></div>'; }
+  function bar(p, color) { return '<div class="bar-p"><i style="width:' + Math.round(clamp(p, 0, 1) * 100) + '%;background:' + (color || 'var(--c1)') + '"></i></div>'; }
+  function head(eyebrow, title, sub, right) { return '<div class="ph"><div><div class="eyebrow">' + eyebrow + '</div><h1>' + title + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div><div>' + (right || '') + '</div></div>'; }
+  function opts(list, val) { return list.map(function (o) { var v = Array.isArray(o) ? o[0] : o, l = Array.isArray(o) ? o[1] : o; return '<option value="' + esc(v) + '"' + (String(v) === String(val) ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join(''); }
+  var PRODUCTS = [['nexora', 'Nexora AI'], ['discipline', 'Discipline'], ['dashboard', 'Main Dashboard'], ['platform', 'Platform']];
+  var prodName = function (id) { var p = PRODUCTS.filter(function (x) { return x[0] === id; })[0]; return p ? p[1] : id; };
+
+  function field(f) {
+    var id = 'f_' + f.name, val = f.value === undefined ? '' : f.value, inner;
+    if (f.type === 'select') inner = '<select class="sel" name="' + f.name + '">' + opts(f.options, val) + '</select>';
+    else if (f.type === 'textarea') inner = '<textarea class="txa" name="' + f.name + '">' + esc(val) + '</textarea>';
+    else inner = '<input class="inp" name="' + f.name + '" type="' + (f.type || 'text') + '" value="' + esc(val) + '"' + (f.step ? ' step="' + f.step + '"' : '') + (f.min !== undefined ? ' min="' + f.min + '"' : '') + (f.required ? ' required' : '') + '>';
+    return '<label>' + esc(f.label) + inner + '</label>';
+  }
+  function modal(title, fields, ok, okLabel) {
+    var d = $('dlg'), flat = [];
+    d.innerHTML = '<form class="mf"><h3>' + esc(title) + '</h3>' + fields.map(function (f) {
+      if (Array.isArray(f)) { f.forEach(function (x) { flat.push(x); }); return '<div class="row2">' + f.map(field).join('') + '</div>'; }
+      flat.push(f); return field(f);
+    }).join('') + '<div class="acts"><button type="button" class="btn" data-close>Cancel</button><button class="btn pri">' + (okLabel || 'Save') + '</button></div></form>';
+    var f = d.querySelector('form');
+    f.onsubmit = function (e) {
+      e.preventDefault(); var v = {};
+      flat.forEach(function (fl) { var el = f.elements[fl.name]; v[fl.name] = fl.type === 'number' ? Number(el.value) : el.value; });
+      d.close(); ok(v);
+    };
+    d.querySelector('[data-close]').onclick = function () { d.close(); };
+    d.showModal();
+    var first = f.querySelector('input,select,textarea'); if (first) first.focus();
+  }
+  function sparkBars(series) {
+    var w = 200, h = 34, a = series.slice(-40), mx = Math.max.apply(null, a.map(function (x) { return x.ms || 0; }).concat([1])), bw = w / Math.max(a.length, 1);
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">' + a.map(function (x, i) {
+      var bh = x.ok ? Math.max(3, (x.ms / mx) * (h - 4)) : h; return '<rect x="' + (i * bw + .5).toFixed(1) + '" y="' + (h - bh).toFixed(1) + '" width="' + Math.max(1, bw - 1.5).toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="1.5" fill="' + (x.ok ? 'var(--c2)' : 'var(--bad)') + '" opacity="' + (x.ok ? .8 : 1) + '"/>';
+    }).join('') + '</svg>';
+  }
+  function burndown(sp, st) {
+    var W = 560, H = 230, pl = 38, pr = 12, pt = 12, pb = 28, iw = W - pl - pr, ih = H - pt - pb, N = sp.days, P = Math.max(1, num(sp.committed));
+    var X = function (i) { return pl + iw * i / N; }, Y = function (v) { return pt + ih * (1 - clamp(v, 0, P) / P); };
+    var g = '', i;
+    for (i = 0; i <= 4; i++) { var v = P * i / 4; g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--line)"/><text x="' + (pl - 6) + '" y="' + (Y(v) + 3) + '" text-anchor="end" font-size="9" fill="var(--tx3)">' + Math.round(v) + '</text>'; }
+    for (i = 0; i <= N; i += Math.max(1, Math.round(N / 5))) g += '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="var(--tx3)">D' + i + '</text>';
+    var cum = 0, pts = [[0, P]];
+    for (i = 0; i <= st.last; i++) { cum += num(sp.done[i]); pts.push([i + 1, P - cum]); }
+    var line = pts.map(function (p) { return X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1); }).join(' ');
+    var proj = '';
+    if (st.eta !== null && st.rem > 0 && st.last >= 0) { var ex = Math.min(N, st.eta), ey = Math.max(0, P - cum - st.vel * (ex - st.el)); proj = '<line x1="' + X(st.el) + '" y1="' + Y(P - cum) + '" x2="' + X(ex) + '" y2="' + Y(ey) + '" stroke="var(--gold)" stroke-dasharray="5 4" stroke-width="1.6"/>'; }
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%">' + g + '<line x1="' + X(0) + '" y1="' + Y(P) + '" x2="' + X(N) + '" y2="' + Y(0) + '" stroke="var(--tx3)" stroke-dasharray="4 4"/>' +
+      proj + '<polyline fill="none" stroke="var(--c1)" stroke-width="2.4" stroke-linejoin="round" points="' + line + '"/>' +
+      pts.map(function (p) { return '<circle cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '" r="3.4" fill="var(--c1)"/>'; }).join('') + '</svg>';
+  }
+
+  /* ================= views ================= */
+  var TABS = [['overview', 'Overview'], ['chatbot', 'Chatbot'], ['audience', 'Audience'], ['insights', 'Insights'], ['okrs', 'OKRs'], ['roadmap', 'Roadmap'], ['sprint', 'Sprint'], ['experiments', 'Experiments'], ['flags', 'Feature flags'], ['reliability', 'Reliability'], ['decisions', 'Decisions & risks'], ['activity', 'Activity']];
+  var I18N = {
+    hi: { overview: 'अवलोकन', chatbot: 'चैटबॉट', audience: 'दर्शक', insights: 'इनसाइट्स', okrs: 'OKR', roadmap: 'रोडमैप', sprint: 'स्प्रिंट', experiments: 'प्रयोग', flags: 'फ़ीचर फ़्लैग', reliability: 'विश्वसनीयता', decisions: 'निर्णय और जोखिम', activity: 'गतिविधि', ranking: 'रैंकिंग', status: 'स्थिति' },
+    es: { overview: 'Resumen', chatbot: 'Chatbot', audience: 'Audiencia', insights: 'Insights', okrs: 'OKRs', roadmap: 'Hoja de ruta', sprint: 'Sprint', experiments: 'Experimentos', flags: 'Feature flags', reliability: 'Fiabilidad', decisions: 'Decisiones y riesgos', activity: 'Actividad', ranking: 'Ranking', status: 'Estado' }
+  };
+  var LANG = 'en'; try { LANG = localStorage.getItem('nexora_lang') || 'en'; } catch (e) {}
+  var tl = function (id, def) { return (I18N[LANG] && I18N[LANG][id]) || def; };
+  var cur = 'overview', V = {};
+
+  V.overview = function () {
+    var rows = D.rows, live = rows.filter(function (r) { return !r.unavailable; });
+    var w7 = live.reduce(function (t, r) { return t + r.recent7; }, 0), p7 = live.reduce(function (t, r) { return t + r.prior7; }, 0);
+    var wow = p7 ? (w7 - p7) / p7 : null;
+    var ses = live.reduce(function (t, r) { return t + r.sessions; }, 0), eng = live.reduce(function (t, r) { return t + r.engaged; }, 0), views = live.reduce(function (t, r) { return t + r.total; }, 0);
+    var okrP = S.okrs.length ? S.okrs.reduce(function (t, o) { return t + objProg(o); }, 0) / S.okrs.length : 0;
+    var av = CFG.sites.map(function (s) { return rel(s.id); }).filter(function (x) { return x.n >= 3; });
+    var avg = av.length ? av.reduce(function (t, x) { return t + x.avail; }, 0) / av.length : null;
+    var open = S.risks.filter(function (r) { return r.status !== 'Closed'; }).length;
+    var top = S.roadmap.filter(function (i) { return i.lane !== 'done'; }).sort(function (a, b) { return rice(b) - rice(a); }).slice(0, 3);
+    var sp = sprintStats(S.sprint);
+    var kpi = function (l, v, d, cls) { return '<div class="card kpi"><div class="l">' + l + '</div><div class="v">' + v + '</div><div class="d ' + (cls || '') + '">' + d + '</div></div>'; };
+    var h = head('Weekly business review', 'Your <span class="grad">command center</span>', 'One screen for how every product is doing — the way big teams run their weekly business review.',
+      '<button class="btn pri" data-act="wbr">Generate weekly report</button>');
+    var nal = Object.keys(S.alertState).length;
+    if (nal) h += '<div class="card" style="margin-bottom:1rem;display:flex;align-items:center;gap:.8rem;border-color:rgba(251,113,133,.5)"><span class="tag r">' + nal + ' active alert' + (nal > 1 ? 's' : '') + '</span><span style="flex:1;font-size:.86rem">' + esc(S.alertState[Object.keys(S.alertState)[0]].text) + (nal > 1 ? ' and ' + (nal - 1) + ' more' : '') + '</span><button class="btn sm" data-act="tab" data-v="activity">View</button></div>';
+    h += '<div class="grid g4">' +
+      kpi('North star · weekly views', fmt(w7), wow === null ? 'no prior week yet' : (wow >= 0 ? '▲ ' : '▼ ') + Math.abs(wow * 100).toFixed(0) + '% vs last week', wow === null ? 'fl' : wow >= 0 ? 'up' : 'dn') +
+      kpi('Engagement rate', ses ? pct(eng / ses, 0) : '—', ses ? fmt(eng) + ' of ' + fmt(ses) + ' sessions stay 30s+' : 'needs the updated tracker', 'fl') +
+      kpi('OKR attainment', pct(okrP, 0), S.okrs.length + ' objectives · 70% is a strong score', grade(okrP) === 'g' ? 'up' : grade(okrP) === 'a' ? 'fl' : 'dn') +
+      kpi('Availability', avg === null ? '—' : pct(avg, 2), avg === null ? 'collecting probes…' : 'SLO target ' + S.slo + '%', avg === null ? 'fl' : avg * 100 >= S.slo ? 'up' : 'dn') + '</div>';
+    h += '<div class="grid g2 mt"><div class="card"><div class="card-h"><div><h2>Product health</h2><p>Red / amber / green from traffic, ranking and reliability</p></div></div>';
+    h += rows.length ? rows.map(function (r) {
+      var hh = health(r);
+      return '<div class="prod"><div style="padding-top:4px"><span class="rag ' + hh.st + '"></span></div><div style="flex:1"><b>' + esc(r.name) + '</b> <span class="tag ' + (hh.st === 'green' ? 'g' : hh.st === 'amber' ? 'a' : 'r') + '">' + hh.st.toUpperCase() + '</span>' +
+        (r.rank ? ' <span class="tag b">' + r.ordinal + ' · ' + r.score.toFixed(1) + ' pts</span>' : '') + '<ul>' + hh.reasons.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div></div>';
+    }).join('') : '<div class="empty">Waiting for live data…</div>';
+    h += '</div><div class="card"><div class="card-h"><div><h2>Acquisition funnel</h2><p>Views → sessions → engaged (AARRR-style)</p></div></div><div class="fun">' +
+      [['Views', views], ['Sessions', ses], ['Engaged', eng]].map(function (s, i, a) {
+        var mx = Math.max(1, a[0][1]), conv = i ? (a[i - 1][1] ? s[1] / a[i - 1][1] : 0) : 1;
+        return '<div class="row"><span class="muted">' + s[0] + '</span><div class="b" style="width:' + Math.max(1, s[1] / mx * 100) + '%"></div><b class="num">' + fmt(s[1]) + '</b></div>' + (i ? '<div class="muted" style="margin:-.15rem 0 .1rem 92px">↳ ' + pct(conv, 0) + ' of previous step</div>' : '');
+      }).join('') + '</div></div></div>';
+    h += '<div class="mt">' + chatSummaryCard() + '</div>';
+    h += '<div class="grid g3 mt"><div class="card"><div class="card-h"><div><h3>Top priorities (RICE)</h3><p>Highest impact per effort</p></div><button class="btn sm" data-act="tab" data-v="roadmap">Open</button></div>' +
+      (top.length ? top.map(function (it, i) { return '<div style="display:flex;gap:.6rem;align-items:center;padding:.45rem 0;border-top:' + (i ? '1px solid var(--line)' : '0') + '"><span class="pr">#' + (i + 1) + '</span><div style="flex:1;font-size:.84rem;font-weight:600">' + esc(it.title) + '</div><span class="tag">' + rice(it).toFixed(0) + '</span></div>'; }).join('') : '<div class="empty">No open items</div>') + '</div>' +
+      '<div class="card"><div class="card-h"><div><h3>' + esc(S.sprint.name) + '</h3><p>' + sp.cum + ' of ' + S.sprint.committed + ' points</p></div><span class="tag ' + sp.st[1] + '">' + sp.st[0] + '</span></div>' + bar(S.sprint.committed ? sp.cum / S.sprint.committed : 0, 'var(--c1)') +
+      '<div class="muted" style="margin-top:.6rem">Velocity ' + sp.vel.toFixed(1) + ' pts/day' + (sp.eta !== null && sp.rem > 0 ? ' · forecast day ' + Math.ceil(sp.eta) + ' of ' + S.sprint.days : '') + '</div></div>' +
+      '<div class="card"><div class="card-h"><div><h3>Risks &amp; flags</h3><p>What could bite you</p></div></div><div style="display:flex;gap:1.4rem"><div><div class="num" style="font-size:1.6rem;font-weight:700">' + open + '</div><div class="muted">open risks</div></div><div><div class="num" style="font-size:1.6rem;font-weight:700">' + S.flags.filter(function (f) { return f.on; }).length + '/' + S.flags.length + '</div><div class="muted">flags on</div></div><div><div class="num" style="font-size:1.6rem;font-weight:700">' + S.experiments.length + '</div><div class="muted">experiments</div></div></div></div></div>';
+    h += '<div class="card mt" id="wbrCard" style="display:none"><div class="card-h"><div><h2>Weekly business review</h2><p>Markdown — paste into Slack, Notion or a doc</p></div><div style="display:flex;gap:.4rem"><button class="btn sm" data-act="wbr-copy">Copy</button><button class="btn sm" data-act="wbr-dl">Download .md</button><button class="btn sm" data-act="wbr-pdf">Print / PDF</button><button class="btn sm" data-act="wbr-mail">Email</button></div></div><pre id="wbrOut" style="white-space:pre-wrap"></pre></div>';
+    h += '<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.2rem"><button class="btn sm" data-act="export-all">Export backup</button><button class="btn sm" data-act="import-all">Import backup</button><button class="btn sm dng" data-act="reset">Reset to sample data</button></div>';
+    return h;
+  };
+
+  V.okrs = function () {
+    var h = head('Objectives & key results', 'OKRs that <span class="grad">update themselves</span>', 'Key results marked <b>Live</b> pull their current value straight from your traffic counters. Score of 0.7 = success — that is how Google grades them.', '<button class="btn pri" data-act="add-okr">+ Objective</button>');
+    if (!S.okrs.length) return h + '<div class="empty">No objectives yet.</div>';
+    return h + '<div class="grid g2">' + S.okrs.map(function (o, oi) {
+      var p = objProg(o), g = grade(p);
+      return '<div class="card"><div class="card-h" style="align-items:flex-start"><div style="display:flex;gap:.9rem;align-items:center">' + ring(p, Math.round(p * 100), 66, COLOR[g]) + '<div><h2>' + esc(o.objective) + '</h2><p>' + esc(o.owner) + ' · ' + esc(o.quarter) + ' · score ' + p.toFixed(2) + '</p></div></div>' +
+        '<div style="display:flex;gap:.3rem"><button class="btn sm" data-act="add-kr" data-i="' + oi + '">+ KR</button><button class="btn sm dng" data-act="del" data-arr="okrs" data-i="' + oi + '">✕</button></div></div>' +
+        (o.krs.length ? o.krs.map(function (k, ki) {
+          var c = krCur(k), kp = krProg(k), path = 'okrs.' + oi + '.krs.' + ki;
+          return '<div class="kr"><div class="kr-h"><span>' + esc(k.text) + ' ' + (k.type === 'auto' ? '<span class="tag b" title="' + esc(siteName(k.site)) + ' · ' + k.metric + '">● Live</span>' : '') + '</span><span class="num">' + (c === null ? '—' : (Math.round(c * 10) / 10).toLocaleString()) + ' / ' + num(k.target).toLocaleString() + '</span></div>' + bar(kp, COLOR[grade(kp)]) +
+            '<div class="kr-m">' + (k.type === 'manual' ? '<label>Current <input class="inp s" type="number" data-set="' + path + '.current" value="' + num(k.current) + '"></label>' : '<span>' + esc(siteName(k.site)) + ' · ' + esc(k.metric) + '</span>') +
+            '<label style="display:flex;align-items:center;gap:.4rem">Confidence <input type="range" min="0" max="10" step="1" style="width:110px;--v:' + k.conf * 10 + '%" data-set="' + path + '.conf" value="' + num(k.conf) + '"> <b data-out="' + path + '.conf">' + num(k.conf) + '/10</b></label>' +
+            '<button class="btn sm dng" data-act="del-kr" data-i="' + oi + '" data-k="' + ki + '">Remove</button></div></div>';
+        }).join('') : '<div class="empty">Add a key result.</div>') + '</div>';
+    }).join('') + '</div>';
+  };
+
+  V.roadmap = function () {
+    var lanes = [['now', 'Now'], ['next', 'Next'], ['later', 'Later'], ['done', 'Done']];
+    var ranked = S.roadmap.filter(function (i) { return i.lane !== 'done'; }).sort(function (a, b) { return rice(b) - rice(a); });
+    var pos = {}; ranked.forEach(function (it, i) { pos[it.id] = i + 1; });
+    var h = head('Product roadmap', 'Now · Next · Later, <span class="grad">ranked by RICE</span>', 'RICE = Reach × Impact × Confidence ÷ Effort. Drag cards between lanes. Every lane re-sorts itself by priority.', '<button class="btn pri" data-act="add-item">+ Initiative</button>');
+    h += '<div class="board">' + lanes.map(function (l) {
+      var items = S.roadmap.map(function (it, i) { return { it: it, i: i }; }).filter(function (x) { return x.it.lane === l[0]; }).sort(function (a, b) { return rice(b.it) - rice(a.it); });
+      return '<div class="lane" data-lane="' + l[0] + '"><div class="lane-h"><span>' + l[1] + '</span><span class="tag">' + items.length + '</span></div>' + items.map(function (x) {
+        var it = x.it, q = quadrant(it);
+        return '<div class="item" draggable="true" data-i="' + x.i + '"><b>' + (pos[it.id] ? '<span class="pr">#' + pos[it.id] + '</span> ' : '') + esc(it.title) + '</b><div class="meta"><span class="tag">' + esc(prodName(it.product)) + '</span><span class="tag ' + q[1] + '">' + q[0] + '</span><span class="tag">RICE ' + rice(it).toFixed(0) + '</span></div>' +
+          '<div class="acts"><button class="btn sm" data-act="move" data-i="' + x.i + '" data-d="-1">◀</button><button class="btn sm" data-act="move" data-i="' + x.i + '" data-d="1">▶</button><button class="btn sm" data-act="edit-item" data-i="' + x.i + '">Edit</button><button class="btn sm dng" data-act="del" data-arr="roadmap" data-i="' + x.i + '">✕</button></div></div>';
+      }).join('') + '</div>';
+    }).join('') + '</div>';
+    h += '<div class="card mt"><div class="card-h"><div><h2>Prioritized backlog</h2><p>Everything not done, best first</p></div></div><div class="tw"><table class="t"><thead><tr><th>#</th><th>Initiative</th><th>Product</th><th>Reach</th><th>Impact</th><th>Conf.</th><th>Effort</th><th>RICE</th><th>Type</th></tr></thead><tbody>' +
+      ranked.map(function (it, i) { var q = quadrant(it); return '<tr><td class="pr">#' + (i + 1) + '</td><td><b>' + esc(it.title) + '</b></td><td>' + esc(prodName(it.product)) + '</td><td class="num">' + fmt(num(it.reach)) + '</td><td class="num">' + it.impact + '</td><td class="num">' + it.confidence + '%</td><td class="num">' + it.effort + 'w</td><td class="num"><b>' + rice(it).toFixed(0) + '</b></td><td><span class="tag ' + q[1] + '">' + q[0] + '</span></td></tr>'; }).join('') + '</tbody></table></div></div>';
+    return h;
+  };
+
+  V.sprint = function () {
+    var sp = S.sprint, st = sprintStats(sp), start = new Date(sp.start + 'T00:00:00Z').getTime();
+    var hist = S.sprints.slice(-6), avg3 = S.sprints.slice(-3).length ? S.sprints.slice(-3).reduce(function (t, x) { return t + x.velocity; }, 0) / S.sprints.slice(-3).length : 0;
+    var h = head('Agile delivery', 'Sprint <span class="grad">burndown &amp; velocity</span>', 'Track committed points against the ideal line, forecast the finish, and size the next sprint from real velocity.',
+      '<button class="btn" data-act="edit-sprint">Edit sprint</button> <button class="btn pri" data-act="close-sprint">Close sprint</button>');
+    h += '<div class="grid" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)"><div class="card"><div class="card-h"><div><h2>' + esc(sp.name) + ' burndown</h2><p>Solid = actual · grey dashed = ideal · gold dashed = forecast</p></div><span class="tag ' + st.st[1] + '">' + st.st[0] + '</span></div>' + burndown(sp, st) + '</div>' +
+      '<div class="card"><div class="card-h"><div><h2>Sprint stats</h2></div></div><div style="display:flex;gap:1rem;align-items:center">' + ring(sp.committed ? st.cum / sp.committed : 0, Math.round((sp.committed ? st.cum / sp.committed : 0) * 100) + '%', 92, 'var(--c1)') +
+      '<div style="font-size:.82rem;line-height:1.9"><div>Committed <b class="num">' + sp.committed + '</b></div><div>Done <b class="num">' + st.cum + '</b></div><div>Remaining <b class="num">' + st.rem + '</b></div><div>Velocity <b class="num">' + st.vel.toFixed(1) + '</b>/day</div></div></div>' +
+      '<div class="muted" style="margin-top:.8rem">' + (st.eta !== null && st.rem > 0 ? 'At this pace you finish on day <b>' + Math.ceil(st.eta) + '</b> of ' + sp.days + '.' : st.rem <= 0 ? 'Sprint goal reached.' : 'Log your first day to get a forecast.') + '</div></div></div>';
+    h += '<div class="card mt"><div class="card-h"><div><h2>Daily log</h2><p>Points completed each day</p></div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:.6rem">' +
+      sp.done.map(function (d, i) { var dt = new Date(start + i * DAY); return '<label style="font-size:.68rem;color:var(--tx3);display:grid;gap:.25rem">D' + (i + 1) + ' · ' + dt.toUTCString().slice(5, 11) + '<input class="inp" type="number" min="0" data-set="sprint.done.' + i + '" data-null="1" value="' + (d === null ? '' : d) + '"></label>'; }).join('') + '</div></div>';
+    h += '<div class="card mt"><div class="card-h"><div><h2>Velocity history</h2><p>Plan the next sprint at ≈ <b>' + Math.round(avg3) + '</b> points (3-sprint average)</p></div></div>' + (hist.length ? '<div style="display:flex;gap:.8rem;align-items:flex-end;height:120px">' + hist.map(function (x) {
+      var mx = Math.max.apply(null, hist.map(function (y) { return y.velocity; }).concat([1])); return '<div style="flex:1;text-align:center"><div class="num" style="font-size:.78rem;margin-bottom:4px">' + x.velocity + '</div><div style="height:' + Math.max(4, x.velocity / mx * 80) + 'px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--c2),var(--c1))"></div><div class="muted" style="margin-top:4px">' + esc(x.name) + '</div></div>'; }).join('') + '</div>' : '<div class="empty">Close a sprint to start your history.</div>') + '</div>';
+    return h;
+  };
+
+  V.experiments = function () {
+    var h = head('Experimentation', 'A/B tests with <span class="grad">real statistics</span>', 'Two-proportion z-test, confidence interval, Bayesian probability to be best, and a ship / keep-running decision with a power check.', '<button class="btn pri" data-act="add-exp">+ Experiment</button>');
+    if (!S.experiments.length) return h + '<div class="empty">No experiments yet.</div>';
+    return h + S.experiments.map(function (e, ei) {
+      var st = expStats(e);
+      return '<div class="card mt"><div class="card-h"><div><h2>' + esc(e.name) + '</h2><p>Metric: ' + esc(e.metric) + '</p></div><div style="display:flex;gap:.3rem"><button class="btn sm" data-act="add-variant" data-i="' + ei + '">+ Variant</button><button class="btn sm dng" data-act="del" data-arr="experiments" data-i="' + ei + '">✕</button></div></div>' +
+        '<div class="tw"><table class="t"><thead><tr><th>Variant</th><th>Visitors</th><th>Conversions</th><th>Rate</th><th>Lift</th><th>p-value</th><th>95% CI (diff)</th><th>P(best)</th></tr></thead><tbody>' +
+        st.v.map(function (x, vi) {
+          var path = 'experiments.' + ei + '.variants.' + vi;
+          return '<tr><td><input class="inp" style="min-width:140px" data-set="' + path + '.name" value="' + esc(x.name) + '"></td><td><input class="inp s" type="number" min="0" data-set="' + path + '.n" value="' + x.n + '"></td><td><input class="inp s" type="number" min="0" data-set="' + path + '.c" value="' + x.c + '"></td>' +
+            '<td class="num"><b>' + pct(x.p, 2) + '</b></td><td class="num ' + (x.lift === null || x.lift === undefined ? '' : x.lift >= 0 ? 'up' : 'dn') + '">' + (x.lift === null || x.lift === undefined ? '—' : (x.lift >= 0 ? '+' : '') + (x.lift * 100).toFixed(1) + '%') + '</td>' +
+            '<td class="num">' + (x.pv === undefined ? '—' : x.pv < .001 ? '<0.001' : x.pv.toFixed(3)) + '</td><td class="num muted">' + (x.ci ? (x.ci[0] * 100).toFixed(1) + '% … ' + (x.ci[1] * 100).toFixed(1) + '%' : '—') + '</td>' +
+            '<td style="min-width:110px"><div style="display:flex;align-items:center;gap:.5rem"><div style="flex:1">' + bar(x.best, 'var(--c2)') + '</div><span class="num">' + Math.round(x.best * 100) + '%</span></div></td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div style="margin-top:.8rem;padding:.8rem 1rem;border-radius:12px;font-size:.86rem;font-weight:600;background:' + (st.tone === 'g' ? 'rgba(52,211,153,.14)' : st.tone === 'r' ? 'rgba(251,113,133,.14)' : 'rgba(251,191,36,.13)') + '">Decision: ' + esc(st.decision) + '</div></div>';
+    }).join('');
+  };
+
+  V.flags = function () {
+    var vid = S.testVisitor || FL.visitorId(), env = S.testEnv || 'prod';
+    var client = FL.create(S.flags, { visitor: vid, env: env });
+    var h = head('Release management', 'Feature flags &amp; <span class="grad">staged rollouts</span>', 'Ship dark, roll out to 5% → 25% → 100%, and kill a feature instantly. Visitors are bucketed by hash, so the same person always sees the same experience.', '<button class="btn pri" data-act="add-flag">+ Flag</button>');
+    h += '<div class="card">' + (S.flags.length ? S.flags.map(function (f, i) {
+      var path = 'flags.' + i;
+      return '<div class="flag"><label class="sw"><input type="checkbox" data-set="' + path + '.on"' + (f.on ? ' checked' : '') + '><span></span></label><div><b>' + esc(f.key) + '</b> ' + (f.env || []).map(function (e) { return '<span class="tag">' + esc(e) + '</span>'; }).join(' ') + '<div class="muted">' + esc(f.desc) + ' · owner ' + esc(f.owner || '—') + '</div></div>' +
+        '<div class="ro"><div style="display:flex;align-items:center;gap:.6rem"><input type="range" min="0" max="100" step="5" style="flex:1;--v:' + f.rollout + '%" data-set="' + path + '.rollout" value="' + f.rollout + '"><b class="num" data-out="' + path + '.rollout" style="min-width:42px;text-align:right">' + f.rollout + '%</b></div></div>' +
+        '<button class="btn sm dng" data-act="del" data-arr="flags" data-i="' + i + '">✕</button></div>';
+    }).join('') : '<div class="empty">No flags yet.</div>') + '</div>';
+    h += '<div class="grid g2 mt"><div class="card"><div class="card-h"><div><h2>Test as a visitor</h2><p>See what a given person gets</p></div></div><div class="grid g2" style="gap:.6rem"><label class="muted">Visitor ID<input class="inp" data-set="testVisitor" value="' + esc(vid) + '"></label><label class="muted">Environment<select class="sel" data-set="testEnv">' + opts(['prod', 'dev'], env) + '</select></label></div>' +
+      '<table class="t" style="margin-top:.7rem"><thead><tr><th>Flag</th><th>Bucket</th><th>Result</th></tr></thead><tbody>' + S.flags.map(function (f) { return '<tr><td>' + esc(f.key) + '</td><td class="num">' + client.bucket(f.key) + '</td><td><span class="tag ' + (client.isOn(f.key) ? 'g' : '') + '">' + (client.isOn(f.key) ? 'ON' : 'OFF') + '</span></td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="card"><div class="card-h"><div><h2>Use it in your sites</h2><p>Drop in <code class="k">analysis-flags.js</code></p></div><button class="btn sm" data-act="copy-flags">Copy flags JSON</button></div><pre>' + esc('<scr' + 'ipt src="analysis/analysis-flags.js"></scr' + 'ipt>\n<scr' + 'ipt>\n  const flags = AnalysisFlags.create(\n    ' + JSON.stringify(S.flags.map(function (f) { return { key: f.key, on: f.on, rollout: f.rollout, env: f.env }; })) + ',\n    { env: "prod" }\n  );\n  if (flags.isOn("' + (S.flags[0] ? S.flags[0].key : 'my-flag') + '")) {\n    // show the new experience\n  }\n</scr' + 'ipt>') + '</pre></div></div>';
+    return h;
+  };
+
+  V.reliability = function () {
+    var h = head('Site reliability', 'SLOs &amp; <span class="grad">error budgets</span>', 'Measured from this browser: each probe records whether your site answered and how fast. Availability against your SLO tells you how much error budget is left — the Google SRE way.',
+      '<label class="muted" style="margin-right:.6rem">SLO <input class="inp s" type="number" step="0.1" min="90" max="100" data-set="slo" value="' + S.slo + '">%</label><button class="btn pri" data-act="probe">Probe now</button>');
+    h += '<div class="grid g3">' + CFG.sites.map(function (s) {
+      var r = rel(s.id), g = r.avail === null ? '' : r.avail * 100 >= S.slo ? 'g' : r.avail >= .95 ? 'a' : 'r';
+      return '<div class="card"><div class="card-h"><div><h2>' + esc(s.name) + '</h2><p>' + esc(s.url.replace('https://', '')) + '</p></div><span class="tag ' + g + '">' + (r.avail === null ? 'No data' : r.avail * 100 >= S.slo ? 'Within SLO' : 'SLO missed') + '</span></div>' +
+        '<div style="display:flex;gap:1rem;align-items:center">' + ring(r.avail === null ? 0 : r.avail, r.avail === null ? '—' : (r.avail * 100).toFixed(1), 84, COLOR[g || 'a']) +
+        '<div style="font-size:.8rem;line-height:1.8"><div>p50 <b class="num">' + (r.p50 === null ? '—' : r.p50 + ' ms') + '</b></div><div>p95 <b class="num">' + (r.p95 === null ? '—' : r.p95 + ' ms') + '</b></div><div>Probes <b class="num">' + r.n + '</b> · failed <b class="num">' + r.fails + '</b></div></div></div>' +
+        '<div style="margin:.9rem 0 .3rem;display:flex;justify-content:space-between" class="muted"><span>Error budget left</span><b class="num">' + (r.n < 3 ? '—' : Math.round(r.budget * 100) + '%') + '</b></div>' + bar(r.n < 3 ? 0 : r.budget, COLOR[r.budget > .5 ? 'g' : r.budget > .2 ? 'a' : 'r']) +
+        '<div style="margin-top:.9rem">' + (r.series.length ? sparkBars(r.series) : '<div class="empty">Collecting…</div>') + '</div></div>';
+    }).join('') + '</div>';
+    var inc = []; CFG.sites.forEach(function (s) { (S.uptime[s.id] || []).forEach(function (x) { if (!x.ok) inc.push({ s: s.name, t: x.t }); }); });
+    inc.sort(function (a, b) { return b.t - a.t; });
+    h += '<div class="card mt"><div class="card-h"><div><h2>Incident log</h2><p>Failed probes</p></div></div>' + (inc.length ? '<table class="t"><thead><tr><th>When</th><th>Site</th></tr></thead><tbody>' + inc.slice(0, 12).map(function (x) { return '<tr><td>' + new Date(x.t).toLocaleString() + '</td><td>' + esc(x.s) + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty">No failed probes. Keep this tab open to keep collecting data.</div>') + '<div class="muted" style="margin-top:.7rem">Probes use a cross-origin request from your browser, so they measure reachability and speed as <i>you</i> experience it. For 24/7 uptime, add a server-side monitor.</div></div>';
+    h += vitalsCard();
+    return h;
+  };
+
+  V.decisions = function () {
+    var h = head('Governance', 'Decision log &amp; <span class="grad">risk register</span>', 'Write decisions down (architecture decision records, as used at Amazon and Google) and score risks by likelihood × impact.', '<button class="btn" data-act="add-risk">+ Risk</button> <button class="btn pri" data-act="add-adr">+ Decision</button>');
+    h += '<div class="grid g2"><div class="card"><div class="card-h"><div><h2>Decision log</h2><p>Why we built it this way</p></div></div>' + (S.decisions.length ? S.decisions.slice().reverse().map(function (d) {
+      var i = S.decisions.indexOf(d);
+      return '<div style="padding:.8rem 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center"><b style="font-size:.9rem">' + esc(d.title) + '</b><span class="tag ' + (d.status === 'Accepted' ? 'g' : d.status === 'Proposed' ? 'a' : '') + '">' + esc(d.status) + '</span></div><div class="muted">' + esc(d.date) + '</div>' +
+        '<p style="font-size:.8rem;color:var(--tx2);margin:.4rem 0 0"><b>Context:</b> ' + esc(d.context) + '</p><p style="font-size:.8rem;color:var(--tx2);margin:.25rem 0 0"><b>Decision:</b> ' + esc(d.decision) + '</p>' +
+        '<div style="display:flex;gap:.3rem;margin-top:.5rem"><select class="sel" style="width:auto;padding:.2rem .5rem;font-size:.72rem" data-set="decisions.' + i + '.status">' + opts(['Proposed', 'Accepted', 'Superseded'], d.status) + '</select><button class="btn sm dng" data-act="del" data-arr="decisions" data-i="' + i + '">✕</button></div></div>';
+    }).join('') : '<div class="empty">No decisions logged.</div>') + '</div>' +
+      '<div class="card"><div class="card-h"><div><h2>Risk register</h2><p>Highest score first</p></div></div>' + (S.risks.length ? S.risks.map(function (r, i) { return { r: r, i: i, s: num(r.likelihood) * num(r.impact) }; }).sort(function (a, b) { return b.s - a.s; }).map(function (x) {
+        var r = x.r, tone = x.s >= 12 ? 'r' : x.s >= 6 ? 'a' : 'g';
+        return '<div style="padding:.8rem 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center"><b style="font-size:.9rem">' + esc(r.title) + '</b><span class="tag ' + tone + '">' + x.s + ' · ' + (tone === 'r' ? 'High' : tone === 'a' ? 'Medium' : 'Low') + '</span></div><div class="muted">L' + r.likelihood + ' × I' + r.impact + ' · owner ' + esc(r.owner) + '</div>' +
+          '<p style="font-size:.8rem;color:var(--tx2);margin:.4rem 0 0"><b>Mitigation:</b> ' + esc(r.mitigation) + '</p><div style="display:flex;gap:.3rem;margin-top:.5rem"><select class="sel" style="width:auto;padding:.2rem .5rem;font-size:.72rem" data-set="risks.' + x.i + '.status">' + opts(['Open', 'Mitigating', 'Closed'], r.status) + '</select><button class="btn sm dng" data-act="del" data-arr="risks" data-i="' + x.i + '">✕</button></div></div>';
+      }).join('') : '<div class="empty">No risks logged.</div>') + '</div></div>';
+    h += changelogCard();
+    return h;
+  };
+
+  /* ================= intelligence: anomalies, forecasts, recommendations, alerts ================= */
+  function siteIntel(r) {
+    if (r.unavailable) return null;
+    // today is a partial day, so anomaly detection and the forecast fit use completed days only
+    var done = r.daily.slice(0, -1), doneDays = r.days.slice(0, -1);
+    var an = ALG.detectAnomalies(done), clean = done.slice();
+    an.forEach(function (x) { clean[x.index] = x.expected; });       // robust: one-off outliers don't drag the forecast
+    var fc = ALG.forecast(clean, doneDays, 7), last7 = done.slice(-7).reduce(function (t, v) { return t + v; }, 0);
+    return { an: an, fc: fc, last7: last7, next: fc.total, chg: last7 > 0 ? (fc.total - last7) / last7 : (fc.total > 0 ? 1 : 0),
+      lo: fc.points.reduce(function (t, p) { return t + p.lo; }, 0), hi: fc.points.reduce(function (t, p) { return t + p.hi; }, 0),
+      recent: an.filter(function (x) { return x.index >= done.length - 2; }), nDone: done.length };
+  }
+  function forecastChart(r, it) {
+    var W = 520, H = 190, pl = 34, pr = 10, pt = 12, pb = 26, iw = W - pl - pr, ih = H - pt - pb, n = r.daily.length, nd = n - 1, h = it.fc.points.length, N = nd + h;
+    var mx = Math.max.apply(null, r.daily.concat(it.fc.points.map(function (p) { return p.hi; })).concat([1])) * 1.1;
+    var X = function (i) { return pl + iw * i / (N - 1); }, Y = function (v) { return pt + ih * (1 - v / mx); }, g = '', i;
+    for (i = 0; i <= 3; i++) { var v = mx * i / 3; g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="var(--line)"/><text x="' + (pl - 5) + '" y="' + (Y(v) + 3).toFixed(1) + '" text-anchor="end" font-size="9" fill="var(--tx3)">' + (mx < 6 ? v.toFixed(1) : Math.round(v)) + '</text>'; }
+    var wd = 'SMTWTFS', dowOf = function (st) { return new Date(Date.UTC(+st.slice(0, 4), +st.slice(4, 6) - 1, +st.slice(6, 8))).getUTCDay(); };
+    for (i = 0; i < N; i++) { var lab = i < nd ? wd[dowOf(r.days[i])] : wd[it.fc.points[i - nd].dow]; g += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 9) + '" text-anchor="middle" font-size="8.5" fill="' + (i < nd ? 'var(--tx3)' : 'var(--c2)') + '">' + lab + '</text>'; }
+    var lastDone = r.daily[nd - 1], up = [[nd - 1, lastDone]].concat(it.fc.points.map(function (p, k) { return [nd + k, p.hi]; })), lo = [[nd - 1, lastDone]].concat(it.fc.points.map(function (p, k) { return [nd + k, p.lo]; })).reverse();
+    var band = up.concat(lo).map(function (p) { return X(p[0]).toFixed(1) + ',' + Y(p[1]).toFixed(1); }).join(' ');
+    var act = r.daily.slice(0, nd).map(function (v, k) { return X(k).toFixed(1) + ',' + Y(v).toFixed(1); }).join(' ');
+    var fcl = [X(nd - 1).toFixed(1) + ',' + Y(lastDone).toFixed(1)].concat(it.fc.points.map(function (p, k) { return X(nd + k).toFixed(1) + ',' + Y(p.value).toFixed(1); })).join(' ');
+    var dots = it.an.map(function (a) { return '<circle cx="' + X(a.index).toFixed(1) + '" cy="' + Y(a.value).toFixed(1) + '" r="5" fill="' + (a.type === 'drop' ? 'var(--bad)' : 'var(--gold)') + '" stroke="var(--card-solid)" stroke-width="2"><title>' + a.type + ': ' + a.value + ' vs ~' + Math.round(a.expected) + ' expected</title></circle>'; }).join('');
+    var tod = '<circle cx="' + X(nd).toFixed(1) + '" cy="' + Y(r.daily[nd]).toFixed(1) + '" r="4" fill="var(--card-solid)" stroke="var(--c1)" stroke-width="2"><title>Today so far (partial day): ' + r.daily[nd] + '</title></circle>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%">' + g + '<polygon points="' + band + '" fill="var(--c2)" opacity=".16"/><line x1="' + X(nd).toFixed(1) + '" x2="' + X(nd).toFixed(1) + '" y1="' + pt + '" y2="' + (H - pb) + '" stroke="var(--tx3)" stroke-dasharray="3 3"/>' +
+      '<text x="' + (X(nd) + 4).toFixed(1) + '" y="' + (pt + 9) + '" font-size="8.5" fill="var(--tx3)">today</text><polyline points="' + act + '" fill="none" stroke="var(--c1)" stroke-width="2.3" stroke-linejoin="round"/>' +
+      '<polyline points="' + fcl + '" fill="none" stroke="var(--c2)" stroke-width="2.2" stroke-dasharray="5 4"/>' + dots + tod + '</svg>';
+  }
+  function recommendations() {
+    var out = [];
+    function add(sev, score, title, detail, tab) { out.push({ sev: sev, score: score, title: title, detail: detail, tab: tab }); }
+    D.rows.forEach(function (r) {
+      if (r.unavailable) { add('r', 95, 'Restore the ' + r.name + ' traffic counter', 'The counter could not be read, so ranking and key results for it are blind.', 'reliability'); return; }
+      var it = siteIntel(r);
+      it.recent.forEach(function (a) {
+        if (a.type === 'drop') add('r', 90, 'Investigate the traffic drop on ' + r.name, 'Views were ' + a.value + ' vs about ' + Math.round(a.expected) + ' expected (' + Math.round(a.change * 100) + '%). Check recent deploys, broken links and uptime.', 'reliability');
+        else add('g', 60, 'Understand the spike on ' + r.name, 'Views hit ' + a.value + ' vs about ' + Math.round(a.expected) + ' expected. Find the source, capitalise on it, and make sure the site can take the load.', 'overview');
+      });
+      if (it.last7 >= 10 && it.chg < -0.15) add('a', 75, r.name + ' is forecast to fall ' + Math.round(-it.chg * 100) + '%', 'Projected about ' + Math.round(it.next) + ' views next week vs ' + it.last7 + ' this week. Plan a re-engagement push or ship something visible.', 'roadmap');
+      if (r.sessions >= 20 && r.engaged / r.sessions < .3) add('a', 70, 'Only ' + Math.round(r.engaged / r.sessions * 100) + '% of ' + r.name + ' visits stay 30s+', 'Try a stronger first screen and measure it with an A/B experiment.', 'experiments');
+      if (r.recent7 === 0 && r.total > 0) add('a', 65, r.name + ' had no views this week', 'Link to it from your dashboard, share it, or reconsider its roadmap priority.', 'roadmap');
+    });
+    S.okrs.forEach(function (o) { o.krs.forEach(function (k) { if (krCur(k) !== null && krProg(k) < .4 && num(k.conf) <= 4) add('a', 68, 'Key result at risk: ' + k.text, 'Progress ' + Math.round(krProg(k) * 100) + '% with confidence ' + k.conf + '/10 in “' + o.objective + '”. Re-scope it or add support.', 'okrs'); }); });
+    var nowN = S.roadmap.filter(function (i) { return i.lane === 'now'; }).length;
+    if (nowN > 3) add('a', 72, 'Too much in progress (' + nowN + ' items in Now)', 'The Kanban WIP limit is 3. Finish before starting — move the lowest-RICE item back to Next.', 'roadmap');
+    var sp = sprintStats(S.sprint);
+    if (sp.st[0] === 'At risk') { var low = S.roadmap.filter(function (i) { return i.lane === 'now'; }).sort(function (a, b) { return rice(a) - rice(b); })[0]; add('r', 80, 'Sprint is at risk', 'Velocity ' + sp.vel.toFixed(1) + '/day will not finish ' + S.sprint.committed + ' points.' + (low ? ' Consider cutting “' + low.title + '” (lowest RICE).' : ''), 'sprint'); }
+    CFG.sites.forEach(function (s) { var q = rel(s.id); if (q.n >= 5 && q.budget < .2) add('r', 85, 'Error budget nearly spent on ' + s.name, 'Only ' + Math.round(q.budget * 100) + '% left. SRE rule of thumb: pause risky releases until it recovers.', 'reliability'); });
+    S.flags.filter(function (f) { return f.on && f.rollout >= 100; }).forEach(function (f) { add('g', 40, 'Clean up flag “' + f.key + '”', 'It is at 100%. Remove the flag and the old code path to avoid tech debt.', 'flags'); });
+    S.experiments.forEach(function (e) { var st = expStats(e); if (st.tone === 'g') add('g', 66, 'Experiment ready to ship: ' + e.name, st.decision, 'experiments'); });
+    if (!S.demo && EXT.chat) chatInsights(chatStats(EXT.chat)).forEach(function (x) { add(x.sev, x.score, x.title, x.detail, 'chatbot'); });
+    if (!out.length) add('g', 10, 'All clear', 'No urgent actions. Keep shipping.', 'roadmap');
+    return out.sort(function (a, b) { return b.score - a.score; });
+  }
+  function currentAlerts() {
+    var a = [];
+    D.rows.forEach(function (r) {
+      if (r.unavailable) { a.push({ key: 'down:' + r.id, level: 'r', text: r.name + ' traffic counter unreachable' }); return; }
+      siteIntel(r).recent.forEach(function (x) { a.push({ key: x.type + ':' + r.id + ':' + x.index, level: x.type === 'drop' ? 'r' : 'a', text: r.name + ' traffic ' + x.type + ': ' + x.value + ' views vs about ' + Math.round(x.expected) + ' expected' }); });
+    });
+    CFG.sites.forEach(function (s) {
+      var q = rel(s.id); if (q.n < 5) return;
+      if (q.avail * 100 < S.slo) a.push({ key: 'slo:' + s.id, level: 'r', text: s.name + ' availability ' + (q.avail * 100).toFixed(1) + '% is below the ' + S.slo + '% SLO' });
+      else if (q.budget < .2) a.push({ key: 'budget:' + s.id, level: 'a', text: s.name + ' error budget is under 20%' });
+    });
+    if (sprintStats(S.sprint).st[0] === 'At risk') a.push({ key: 'sprint', level: 'a', text: S.sprint.name + ' is at risk of missing its commitment' });
+    if (!S.demo && EXT.chat) chatInsights(chatStats(EXT.chat)).filter(function (x) { return x.sev === 'r'; }).forEach(function (x) { a.push({ key: 'chat:' + x.title.slice(0, 24), level: 'r', text: 'Chatbot: ' + x.title }); });
+    return a;
+  }
+  function notify(x) { sendChannels('Analysis alert: ' + x.text); if (S.notify && 'Notification' in window && Notification.permission === 'granted') { try { new Notification('Analysis alert', { body: x.text }); } catch (e) {} } }
+  function updateBell() { var n = Object.keys(S.alertState).length, b = $('bellN'); if (b) { b.style.display = n ? '' : 'none'; b.textContent = n; } }
+  function evaluateAlerts() {
+    if (!D.rows.length) return;
+    var cur = currentAlerts(), prev = S.alertState || {}, next = {}, now = Date.now();
+    cur.forEach(function (x) { next[x.key] = { t: prev[x.key] ? prev[x.key].t : now, level: x.level, text: x.text }; if (!prev[x.key]) { S.alertLog.unshift({ t: now, level: x.level, text: x.text, event: 'fired' }); notify(x); } });
+    Object.keys(prev).forEach(function (k) { if (!next[k]) S.alertLog.unshift({ t: now, level: 'g', text: prev[k].text, event: 'resolved' }); });
+    S.alertLog = S.alertLog.slice(0, 100); S.alertState = next; save(); updateBell();
+  }
+  var ago = function (t) { var m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; };
+  var KIND = { okr: 'var(--c1)', roadmap: 'var(--c2)', flag: 'var(--c3)', sprint: 'var(--gold)', experiment: '#e879f9', decision: '#60a5fa', risk: 'var(--bad)', delete: 'var(--bad)', info: 'var(--tx3)' };
+
+  V.insights = function () {
+    var h = head('Intelligence', 'Forecasts, anomalies &amp; <span class="grad">next best actions</span>', 'Seven-day forecasts with an 80% band, robust anomaly detection on daily traffic, and a ranked list of what to do next — the kind of signals big platforms surface automatically.', '<button class="btn" data-act="refresh-data">Refresh</button>');
+    var recs = recommendations();
+    h += '<div class="card"><div class="card-h"><div><h2>Next best actions</h2><p>Ranked by urgency · generated from traffic, reliability, OKRs, roadmap and sprint</p></div><span class="tag">' + recs.length + '</span></div>' +
+      recs.slice(0, 8).map(function (x, i) { return '<div style="display:flex;gap:.8rem;align-items:flex-start;padding:.75rem 0;border-top:' + (i ? '1px solid var(--line)' : '0') + '"><span class="tag ' + x.sev + '" style="margin-top:2px">' + (x.sev === 'r' ? 'Urgent' : x.sev === 'a' ? 'Soon' : 'Good news') + '</span><div style="flex:1"><b style="font-size:.88rem">' + esc(x.title) + '</b><div class="muted" style="margin-top:2px;font-size:.8rem;color:var(--tx2)">' + esc(x.detail) + '</div></div><button class="btn sm" data-act="tab" data-v="' + x.tab + '">Open</button></div>'; }).join('') + '</div>';
+    h += '<div class="grid g2 mt">' + (D.rows.filter(function (r) { return !r.unavailable; }).map(function (r) {
+      var it = siteIntel(r);
+      return '<div class="card"><div class="card-h"><div><h2>' + esc(r.name) + '</h2><p>Completed days + 7-day forecast from today</p></div><span class="tag ' + (it.chg >= 0 ? 'g' : 'r') + '">' + (it.chg >= 0 ? '▲ ' : '▼ ') + Math.abs(Math.round(it.chg * 100)) + '% vs this week</span></div>' + forecastChart(r, it) +
+        '<div style="display:flex;gap:1.4rem;flex-wrap:wrap;margin-top:.5rem"><div><div class="num" style="font-size:1.3rem;font-weight:700">≈ ' + Math.round(it.next).toLocaleString() + '</div><div class="muted">views next 7 days</div></div><div><div class="num" style="font-size:1.05rem;font-weight:700">' + Math.round(it.lo) + ' – ' + Math.round(it.hi) + '</div><div class="muted">80% range</div></div><div><div class="num" style="font-size:1.05rem;font-weight:700">' + (it.fc.trendPerDay >= 0 ? '+' : '') + it.fc.trendPerDay.toFixed(1) + '/day</div><div class="muted">trend</div></div></div>' +
+        '<div style="margin-top:.7rem">' + (it.an.length ? it.an.map(function (a) { return '<span class="tag ' + (a.type === 'drop' ? 'r' : 'a') + '" style="margin:0 .3rem .3rem 0">' + a.type + ' · ' + a.value + ' vs ~' + Math.round(a.expected) + '</span>'; }).join('') : '<span class="tag g">No anomalies in the last 14 days</span>') + '</div></div>';
+    }).join('') || '<div class="empty" style="grid-column:1/-1">Waiting for live data…</div>') + '</div>';
+    return h + '<div class="muted" style="margin-top:1rem">Anomalies use median + MAD over the previous 7 completed days (needs ≥50% change and a z-score ≥ 3.5); today is excluded because it is still in progress. Forecasts use Holt trend smoothing with day-of-week seasonality, with outliers smoothed out first.</div>';
+  };
+
+  V.activity = function () {
+    var ids = Object.keys(S.alertState), perm = 'Notification' in window ? Notification.permission : 'unsupported';
+    var h = head('Alerts & audit trail', 'What\'s firing, and <span class="grad">what changed</span>', 'Alerts fire on traffic anomalies, SLO breaches, error-budget burn and sprint risk. The activity feed is a change log of everything done in this workspace.',
+      '<button class="btn ' + (S.notify && perm === 'granted' ? 'pri' : '') + '" data-act="toggle-notify">' + (S.notify && perm === 'granted' ? '🔔 Notifications on' : 'Enable browser notifications') + '</button>');
+    h += '<div class="grid g2"><div class="card"><div class="card-h"><div><h2>Active alerts</h2><p>' + (ids.length ? ids.length + ' firing now' : 'Nothing firing') + '</p></div></div>' +
+      (ids.length ? ids.map(function (k) { var a = S.alertState[k]; return '<div style="display:flex;gap:.7rem;align-items:center;padding:.65rem 0;border-top:1px solid var(--line)"><span class="tag ' + a.level + '">' + (a.level === 'r' ? 'Critical' : 'Warning') + '</span><span style="flex:1;font-size:.84rem">' + esc(a.text) + '</span><span class="muted">' + ago(a.t) + '</span></div>'; }).join('') : '<div class="empty">All clear ✔</div>') +
+      '<div class="card-h" style="margin-top:1.1rem"><div><h3>Alert history</h3></div></div>' + (S.alertLog.length ? S.alertLog.slice(0, 10).map(function (a) { return '<div style="display:flex;gap:.6rem;align-items:center;padding:.4rem 0;font-size:.8rem;color:var(--tx2)"><span class="tag ' + a.level + '">' + a.event + '</span><span style="flex:1">' + esc(a.text) + '</span><span class="muted">' + ago(a.t) + '</span></div>'; }).join('') : '<div class="muted">No alerts have fired yet.</div>') + '</div>' +
+      '<div class="card"><div class="card-h"><div><h2>Activity feed</h2><p>Latest changes in this workspace</p></div></div>' + (S.activity.length ? S.activity.slice(0, 25).map(function (a) { return '<div style="display:flex;gap:.7rem;align-items:flex-start;padding:.55rem 0;border-top:1px solid var(--line);font-size:.83rem"><span style="width:8px;height:8px;border-radius:50%;background:' + (KIND[a.kind] || KIND.info) + ';margin-top:.45rem;flex:none"></span><span style="flex:1">' + esc(a.text) + '</span><span class="muted">' + ago(a.t) + '</span></div>'; }).join('') : '<div class="empty">Changes you make will appear here.</div>') + '</div></div>';
+    h += channelsCard();
+    if (perm === 'denied') h += '<div class="muted" style="margin-top:.8rem">Browser notifications are blocked for this site — enable them in your browser settings.</div>';
+    return h;
+  };
+
+  /* ================= chatbot analytics, audience, vitals ================= */
+  var EXT = { chat: null, aud: {}, vit: null, sb: null };
+  var siteById = function (id) { return CFG.sites.filter(function (s) { return s.id === id; })[0]; };
+  var sumA = function (a) { return a.reduce(function (t, v) { return t + (v || 0); }, 0); };
+  var DAILY_CHAT = ['chat_msgs', 'chat_convos', 'chat_replies', 'chat_errors', 'chat_up', 'chat_down'];
+
+  function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function demoChat() {
+    var r = rng(7), days = R.lastDays(14, Date.now()), daily = {}, tot = {};
+    DAILY_CHAT.forEach(function (m) { daily[m] = []; });
+    days.forEach(function (d, i) {
+      var wd = new Date(Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8))).getUTCDay(), base = 52 + i * 3.2 + (wd === 0 || wd === 6 ? -10 : 8) + r() * 12;
+      var msgs = Math.round(i === 13 ? base * .55 : base), convos = Math.round(msgs / 3.1), replies = Math.round(msgs * .97), errors = Math.round(replies * (.03 + r() * .02));
+      var votes = Math.round(replies * .17), up = Math.round(votes * (.78 + r() * .06));
+      daily.chat_msgs.push(msgs); daily.chat_convos.push(convos); daily.chat_replies.push(replies); daily.chat_errors.push(errors); daily.chat_up.push(up); daily.chat_down.push(votes - up);
+    });
+    var tm = sumA(daily.chat_msgs) * 3, tc = sumA(daily.chat_convos) * 3, tr = sumA(daily.chat_replies) * 3;
+    tot = { chat_msgs: tm, chat_convos: tc, chat_replies: tr, chat_errors: Math.round(tr * .035), chat_up: Math.round(tr * .14), chat_down: Math.round(tr * .034), chat_regen: Math.round(tr * .07), chat_copy: Math.round(tr * .16) };
+    [.14, .3, .31, .18, .07].forEach(function (p, i) { tot['chat_' + CFG.chat.latencyBuckets[i][0]] = Math.round(tr * p); });
+    [.36, .22, .29, .13].forEach(function (p, i) { tot['chat_' + CFG.chat.depthBuckets[i][0]] = Math.round(tc * p); });
+    [.33, .24, .19, .1, .14].forEach(function (p, i) { tot['chat_topic_' + CFG.chat.topics[i][0]] = Math.round(tm * p); });
+    return { days: days, tot: tot, daily: daily, demo: true };
+  }
+  function demoAud(sid) {
+    var r = rng(sid.length * 13), days = R.lastDays(14, Date.now()), src = { direct: 340, search: 210, social: 175, github: 120, email: 40, other: 65 }, ret = [];
+    days.forEach(function (d, i) { var n = 22 + Math.round(r() * 20); ret.push({ day: d, newN: n, r1: i <= 12 ? Math.round(n * (.28 + r() * .1)) : null, r7: i <= 6 ? Math.round(n * (.12 + r() * .08)) : null }); });
+    return { demo: true, days: days, src: src, dev: { desktop: 520, mobile: 430 }, newT: 610, retT: 340, ret: ret, stepVals: { returning: 340, chat_convos: 280, chat_msgs: 910, new: 610 } };
+  }
+  function demoVit() {
+    var o = {}; CFG.sites.forEach(function (s, i) {
+      o[s.id] = { sessions: 800, jserr: 6 + i * 4, lcp: { good: 70 - i * 8, ni: 20, poor: 10 + i * 8 }, cls: { good: 88, ni: 8, poor: 4 }, inp: { good: 76 - i * 6, ni: 17, poor: 7 + i * 6 } };
+    }); return { demo: true, sites: o };
+  }
+
+  async function loadChat() {
+    try {
+      if (S.demo) { EXT.chat = demoChat(); return; }
+      var site = siteById(CFG.chat.siteId); if (!site) return;
+      var base = site.key, days = R.lastDays(14, Date.now()), today = days[13], keys = [], perm = {};
+      var totalsM = ['chat_convos', 'chat_msgs', 'chat_replies', 'chat_errors', 'chat_up', 'chat_down', 'chat_regen', 'chat_copy']
+        .concat(CFG.chat.latencyBuckets.map(function (b) { return 'chat_' + b[0]; }), CFG.chat.depthBuckets.map(function (b) { return 'chat_' + b[0]; }), CFG.chat.topics.map(function (t) { return 'chat_topic_' + t[0]; }));
+      totalsM.forEach(function (m) { keys.push(base + '_' + m); });
+      DAILY_CHAT.forEach(function (m) { days.forEach(function (d) { var k = base + '_' + m + '_' + d; keys.push(k); if (d !== today) perm[k] = true; }); });
+      var res = await R.fetchMany(keys, { permanent: perm }), v = res.values, tot = {}, daily = {}, any = false;
+      totalsM.forEach(function (m) { var x = v[base + '_' + m]; if (x !== null) any = true; tot[m] = x || 0; });
+      DAILY_CHAT.forEach(function (m) { daily[m] = days.map(function (d) { return v[base + '_' + m + '_' + d] || 0; }); });
+      EXT.chat = { days: days, tot: tot, daily: daily, unreachable: !any && res.failed };
+    } catch (e) { /* keep previous */ }
+  }
+  var FUNNEL_DEFAULT = { nexora: [['Visits', 'views'], ['Sessions', 'sessions'], ['Engaged (30s+)', 'engaged'], ['Started a chat', 'chat_convos'], ['Came back', 'returning']] };
+  function funnelFor(sid) { return (S.funnels && S.funnels[sid]) || FUNNEL_DEFAULT[sid] || [['Visits', 'views'], ['Sessions', 'sessions'], ['Engaged (30s+)', 'engaged'], ['Came back', 'returning']]; }
+  function metricKey(base, m) { return m.indexOf('ev:') === 0 ? base + '_ev_' + m.slice(3) : base + '_' + m; }
+  async function loadAud(sid) {
+    try {
+      if (S.demo) { EXT.aud[sid] = demoAud(sid); return; }
+      var site = siteById(sid), base = site.key, days = R.lastDays(14, Date.now()), today = days[13], todayN = Date.UTC(+today.slice(0, 4), +today.slice(4, 6) - 1, +today.slice(6, 8)), keys = [], perm = {};
+      CFG.sources.forEach(function (x) { keys.push(base + '_src_' + x[0]); }); CFG.devices.forEach(function (x) { keys.push(base + '_dev_' + x[0]); });
+      keys.push(base + '_new', base + '_returning');
+      var steps = funnelFor(sid).map(function (s) { return s[1]; }).filter(function (m) { return ['views', 'sessions', 'engaged'].indexOf(m) < 0; });
+      steps.forEach(function (m) { keys.push(metricKey(base, m)); });
+      days.forEach(function (d) {
+        var age = Math.round((todayN - Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8))) / 86400000);
+        [['new_', 1], ['ret1_', 2], ['ret7_', 9]].forEach(function (p) { var k = base + '_' + p[0] + d; keys.push(k); if (age >= p[1]) perm[k] = true; });
+      });
+      var res = await R.fetchMany(keys, { permanent: perm }), v = res.values, g = function (k) { return v[k] || 0; }, src = {}, dev = {}, sv = {};
+      CFG.sources.forEach(function (x) { src[x[0]] = g(base + '_src_' + x[0]); }); CFG.devices.forEach(function (x) { dev[x[0]] = g(base + '_dev_' + x[0]); });
+      steps.forEach(function (m) { sv[m] = g(metricKey(base, m)); });
+      var ret = days.map(function (d, i) { var age = 13 - i; return { day: d, newN: g(base + '_new_' + d), r1: age >= 1 ? g(base + '_ret1_' + d) : null, r7: age >= 7 ? g(base + '_ret7_' + d) : null }; });
+      EXT.aud[sid] = { days: days, src: src, dev: dev, newT: g(base + '_new'), retT: g(base + '_returning'), ret: ret, stepVals: sv };
+    } catch (e) { /* ignore */ }
+  }
+  async function loadVit() {
+    try {
+      if (S.demo) { EXT.vit = demoVit(); return; }
+      var keys = [];
+      CFG.sites.forEach(function (s) { keys.push(s.key + '_jserr'); CFG.vitals.forEach(function (m) { ['good', 'ni', 'poor'].forEach(function (b) { keys.push(s.key + '_cwv_' + m[0] + '_' + b); }); }); });
+      var res = await R.fetchMany(keys, {}), v = res.values, o = {};
+      CFG.sites.forEach(function (s) {
+        var row = row_(s.id), e = { sessions: row ? row.sessions : 0, jserr: v[s.key + '_jserr'] || 0 };
+        CFG.vitals.forEach(function (m) { e[m[0]] = {}; ['good', 'ni', 'poor'].forEach(function (b) { e[m[0]][b] = v[s.key + '_cwv_' + m[0] + '_' + b] || 0; }); });
+        o[s.id] = e;
+      });
+      EXT.vit = { sites: o };
+    } catch (e) { /* ignore */ }
+  }
+  function row_(id) { return D.rows.filter(function (r) { return r.id === id; })[0]; }
+
+  function chatStats(c) {
+    if (!c) return null;
+    var t = c.tot, lat = CFG.chat.latencyBuckets.map(function (b) { return t['chat_' + b[0]] || 0; }), dep = CFG.chat.depthBuckets.map(function (b) { return t['chat_' + b[0]] || 0; }), latN = sumA(lat), depN = sumA(dep);
+    function pctile(q) { if (!latN) return null; var target = q * latN, acc = 0, lo = 0; for (var i = 0; i < lat.length; i++) { var hi = CFG.chat.latencyBuckets[i][2]; if (acc + lat[i] >= target) return lo + (hi - lo) * (lat[i] ? (target - acc) / lat[i] : 0); acc += lat[i]; lo = hi; } return lo; }
+    var replies = t.chat_replies || 0, errors = t.chat_errors || 0, up = t.chat_up || 0, down = t.chat_down || 0, votes = up + down, convos = t.chat_convos || 0, msgs = t.chat_msgs || 0, regen = t.chat_regen || 0, copy = t.chat_copy || 0;
+    var s = { convos: convos, msgs: msgs, replies: replies, errors: errors, up: up, down: down, votes: votes, regen: regen, copy: copy, lat: lat, dep: dep, latN: latN, depN: depN,
+      depth: convos ? msgs / convos : null, errorRate: (replies + errors) ? errors / (replies + errors) : null,
+      csat: votes ? up / votes : null, csatLow: votes ? ALG.wilsonLowerBound(up, votes) : null,
+      feedbackRate: replies ? votes / replies : null, regenRate: replies ? regen / replies : null, copyRate: replies ? copy / replies : null,
+      followUp: depN ? 1 - dep[0] / depN : null, deep: depN ? (dep[2] + dep[3]) / depN : null, p50: pctile(.5), p95: pctile(.95), fast: latN ? (lat[0] + lat[1] + lat[2]) / latN : null };
+    var d = c.daily; s.msgs7 = sumA(d.chat_msgs.slice(-7)); s.msgsPrior = sumA(d.chat_msgs.slice(-14, -7)); s.convos7 = sumA(d.chat_convos.slice(-7)); s.convosPrior = sumA(d.chat_convos.slice(-14, -7));
+    s.wow = s.msgsPrior ? (s.msgs7 - s.msgsPrior) / s.msgsPrior : null;
+    var nx = row_(CFG.chat.siteId); s.sessions = nx ? nx.sessions : 0; s.visits = nx ? nx.total : 0;
+    if (c.demo) { s.sessions = Math.round(convos * 1.7); s.visits = Math.round(s.sessions * 1.35); }
+    s.activation = s.sessions ? Math.min(1, convos / s.sessions) : null;
+    var parts = [], w = 0, tot = 0;
+    function add(wt, val) { if (val !== null && val !== undefined) { tot += wt * val; w += wt; parts.push([wt, val]); } }
+    var satisfaction = votes >= 5 ? s.csatLow * 100 : (s.regenRate !== null ? (1 - Math.min(1, s.regenRate)) * 75 : null);
+    var reliability = s.errorRate !== null ? (1 - s.errorRate) * 100 : null, speed = s.fast !== null ? s.fast * 100 : null;
+    var engagement = s.followUp !== null ? clamp(100 * (s.followUp * .6 + Math.min(1, ((s.depth || 1) - 1) / 3) * .4), 0, 100) : null;
+    add(.35, satisfaction); add(.25, reliability); add(.2, speed); add(.2, engagement);
+    s.health = w ? tot / w : null; s.parts = { Satisfaction: satisfaction, Reliability: reliability, Speed: speed, Engagement: engagement };
+    return s;
+  }
+  var th = function () { return CFG.chat.thresholds; };
+  function chatInsights(s) {
+    var out = [], T = th(), pc = function (v) { return Math.round(v * 100) + '%'; };
+    if (!s || (!s.msgs && !s.replies)) return out;
+    if (s.p95 !== null && s.replies >= T.minReplies) { if (s.p95 > T.p95Ms) out.push({ sev: 'r', score: 88, title: 'Nexora AI replies are slow', detail: '1 in 20 replies takes over ' + (s.p95 / 1000).toFixed(1) + ' s (p95). Stream tokens as they arrive, shorten prompts, or switch to a faster model for simple questions.' }); else if (s.p50 > 3000) out.push({ sev: 'a', score: 62, title: 'Typical reply time is ' + (s.p50 / 1000).toFixed(1) + ' s', detail: 'Streaming the answer makes the same wait feel much shorter.' }); }
+    if (s.errorRate !== null && s.errorRate > T.errorRate && s.replies + s.errors >= T.minReplies) out.push({ sev: 'r', score: 92, title: pc(s.errorRate) + ' of chatbot requests are failing', detail: 'Check API limits, timeouts and model availability, and add a retry with a friendly message.' });
+    else if (s.errorRate !== null && s.errorRate > .04 && s.replies + s.errors >= T.minReplies) out.push({ sev: 'a', score: 58, title: 'Error rate is ' + pc(s.errorRate), detail: 'Aim for under 2%. Look at the most common failure and add a retry.' });
+    if (s.votes >= T.minVotes && s.csat < T.csat) out.push({ sev: 'r', score: 90, title: 'Only ' + pc(s.csat) + ' of rated answers are positive', detail: 'Review the thumbs-down conversations, tighten the system prompt, and test improvements with an A/B experiment.' });
+    else if (s.votes < T.minVotes && s.replies >= T.minReplies) out.push({ sev: 'a', score: 55, title: 'Not enough feedback to judge answer quality', detail: 'Only ' + s.votes + ' rated replies. Add visible 👍 / 👎 buttons under every answer and call chat.feedback().' });
+    if (s.regenRate !== null && s.regenRate > .15 && s.replies >= T.minReplies) out.push({ sev: 'a', score: 66, title: pc(s.regenRate) + ' of answers get regenerated', detail: 'People are not satisfied with the first answer. Look at which topics trigger it and improve those prompts.' });
+    if (s.activation !== null && s.sessions >= 30 && s.activation < .15) out.push({ sev: 'a', score: 64, title: 'Only ' + pc(s.activation) + ' of visits start a chat', detail: 'Add suggested starter questions and a clearer input prompt on the first screen.' });
+    if (s.depth !== null && s.convos >= 20 && s.depth < 1.6) out.push({ sev: 'a', score: 52, title: 'Conversations are short (' + s.depth.toFixed(1) + ' messages)', detail: 'Offer follow-up suggestions after each answer to keep people going.' });
+    if (s.csat !== null && s.votes >= T.minVotes && s.csat >= .8) out.push({ sev: 'g', score: 35, title: 'Users like the answers (' + pc(s.csat) + ' positive)', detail: 'Keep the prompt stable and protect this with an experiment before big changes.' });
+    if (s.wow !== null && s.wow > .25 && s.msgs7 >= 30) out.push({ sev: 'g', score: 45, title: 'Chat usage is up ' + pc(s.wow) + ' on last week', detail: s.msgs7 + ' messages in the last 7 days. Check latency and errors before the next push.' });
+    return out;
+  }
+  var KRM = { chatConvos7: ['Chat conversations (7d)', function (s) { return s.convos7; }], chatMsgs7: ['Chat messages (7d)', function (s) { return s.msgs7; }], csat: ['Chat satisfaction %', function (s) { return s.csat === null ? null : Math.round(s.csat * 100); }], chatErr: ['Chat error rate %', function (s) { return s.errorRate === null ? null : +(s.errorRate * 100).toFixed(1); }], chatP95: ['Chat reply p95 (ms)', function (s) { return s.p95 === null ? null : Math.round(s.p95); }] };
+
+  /* ---------- chatbot views ---------- */
+  function dailyChart(c) {
+    var W = 520, H = 170, pl = 30, pr = 8, pt = 10, pb = 24, iw = W - pl - pr, ih = H - pt - pb, n = c.days.length, m = c.daily.chat_msgs, cv = c.daily.chat_convos;
+    var mx = Math.max.apply(null, m.concat([1])) * 1.1, bw = iw / n, X = function (i) { return pl + bw * i + bw / 2; }, Y = function (v) { return pt + ih * (1 - v / mx); }, g = '', i;
+    for (i = 0; i <= 3; i++) { var v = mx * i / 3; g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="var(--line)"/><text x="' + (pl - 4) + '" y="' + (Y(v) + 3).toFixed(1) + '" text-anchor="end" font-size="9" fill="var(--tx3)">' + Math.round(v) + '</text>'; }
+    var bars = m.map(function (v, k) { var last = k === n - 1, d = c.days[k], wd = 'SMTWTFS'[new Date(Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8))).getUTCDay()]; return '<rect x="' + (X(k) - bw * .32).toFixed(1) + '" y="' + Y(v).toFixed(1) + '" width="' + (bw * .64).toFixed(1) + '" height="' + Math.max(1, ih - (Y(v) - pt)).toFixed(1) + '" rx="3" fill="var(--c1)" opacity="' + (last ? .45 : .9) + '"><title>' + v + ' messages' + (last ? ' (today so far)' : '') + '</title></rect><text x="' + X(k).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="8.5" fill="var(--tx3)">' + wd + '</text>'; }).join('');
+    var line = cv.map(function (v, k) { return X(k).toFixed(1) + ',' + Y(v).toFixed(1); }).join(' ');
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Daily chatbot messages and conversations">' + g + bars + '<polyline points="' + line + '" fill="none" stroke="var(--c3)" stroke-width="2.2" stroke-linejoin="round"/></svg>';
+  }
+  function hbar(label, p, color, right) { return '<div style="display:grid;grid-template-columns:104px 1fr 54px;gap:.6rem;align-items:center;margin:.35rem 0;font-size:.8rem"><span class="muted" style="font-size:.78rem">' + esc(label) + '</span>' + bar(p, color) + '<span class="num" style="text-align:right">' + right + '</span></div>'; }
+  function chatSummaryCard() {
+    var c = EXT.chat, s = chatStats(c), has = s && (s.msgs || s.replies);
+    return '<div class="card"><div class="card-h"><div><h3>Chatbot health</h3><p>Nexora AI</p></div><button class="btn sm" data-act="tab" data-v="chatbot">Open</button></div>' +
+      (has ? '<div style="display:flex;gap:1rem;align-items:center">' + ring((s.health || 0) / 100, Math.round(s.health || 0), 72, (s.health || 0) >= 75 ? 'var(--ok)' : (s.health || 0) >= 55 ? 'var(--warn)' : 'var(--bad)') + '<div style="font-size:.8rem;line-height:1.8"><div>' + fmt(s.convos7) + ' chats this week</div><div>' + (s.csat === null ? 'no ratings yet' : Math.round(s.csat * 100) + '% positive') + '</div><div>' + (s.p50 === null ? '—' : (s.p50 / 1000).toFixed(1) + ' s typical reply') + '</div></div></div>' : '<div class="muted">No chatbot events yet. Add the tracker calls (Chatbot tab) or preview with demo data.</div>') + '</div>';
+  }
+  V.chatbot = function () {
+    var c = EXT.chat, h = head('Chatbot analytics', 'Nexora AI <span class="grad">conversation quality</span>', 'How people use the chatbot, how good the answers feel, and how fast and reliable it is — from conversations, ratings, latency and errors.',
+      '<button class="btn ' + (S.demo ? 'pri' : '') + '" data-act="toggle-demo" aria-pressed="' + !!S.demo + '">' + (S.demo ? 'Demo data on' : 'Show demo data') + '</button> <button class="btn" data-act="tab-scroll" data-v="integ">Integration</button>');
+    if (!c) return h + '<div class="empty">Loading chatbot data…</div>';
+    var s = chatStats(c), has = s.msgs || s.replies, T = th();
+    if (S.demo) h += '<div class="card" style="margin-bottom:1rem;border-color:rgba(251,191,36,.5)"><b>Demo data</b> <span class="muted">— these numbers are made up so you can preview the tab. Alerts and recommendations ignore them. Turn it off to see real data.</span></div>';
+    else if (!has) h += '<div class="card" style="margin-bottom:1rem;border-color:rgba(79,140,255,.5)"><b>No chatbot events yet.</b> <span class="muted">Add three lines to Nexora AI (see Integration below) and this page fills in within minutes. Want to see how it will look first?</span> <button class="btn sm pri" data-act="toggle-demo" style="margin-left:.4rem">Show demo data</button></div>';
+    var kpi = function (l, v, d, cls) { return '<div class="card kpi"><div class="l">' + l + '</div><div class="v">' + v + '</div><div class="d ' + (cls || 'fl') + '">' + d + '</div></div>'; };
+    var pc = function (v) { return v === null ? '—' : Math.round(v * 100) + '%'; };
+    var wowCls = s.wow === null ? 'fl' : s.wow >= 0 ? 'up' : 'dn', wowTxt = s.wow === null ? 'no prior week yet' : (s.wow >= 0 ? '▲ ' : '▼ ') + Math.abs(Math.round(s.wow * 100)) + '% vs last week';
+    h += '<div class="grid g4">' + kpi('Conversations · 7d', fmt(s.convos7), wowTxt, wowCls) + kpi('Messages · 7d', fmt(s.msgs7), s.depth === null ? '—' : s.depth.toFixed(1) + ' per conversation') +
+      kpi('Satisfaction', pc(s.csat), s.votes ? s.votes + ' ratings · ' + pc(s.feedbackRate) + ' rate' : 'no ratings yet', s.csat === null ? 'fl' : s.csat >= T.csat ? 'up' : 'dn') +
+      kpi('Error rate', pc(s.errorRate), s.errorRate === null ? '—' : s.errors + ' failed of ' + fmt(s.replies + s.errors), s.errorRate === null ? 'fl' : s.errorRate <= .04 ? 'up' : 'dn') + '</div>';
+    h += '<div class="grid g4 mt">' + kpi('Typical reply', s.p50 === null ? '—' : (s.p50 / 1000).toFixed(1) + ' s', 'median (p50)') + kpi('Slow replies', s.p95 === null ? '—' : (s.p95 / 1000).toFixed(1) + ' s', '95th percentile', s.p95 === null ? 'fl' : s.p95 <= 4000 ? 'up' : s.p95 > T.p95Ms ? 'dn' : 'fl') +
+      kpi('Visits that chat', pc(s.activation), s.sessions ? fmt(s.convos) + ' chats from ' + fmt(s.sessions) + ' sessions' : 'needs the tracker') + kpi('Regenerated', pc(s.regenRate), s.copyRate === null ? '—' : pc(s.copyRate) + ' copy an answer') + '</div>';
+    h += '<div class="grid mt" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)"><div class="card"><div class="card-h"><div><h2>Health score</h2><p>Satisfaction · reliability · speed · engagement</p></div></div>' +
+      '<div style="display:flex;gap:1.1rem;align-items:center">' + ring((s.health || 0) / 100, s.health === null ? '—' : Math.round(s.health), 112, (s.health || 0) >= 75 ? 'var(--ok)' : (s.health || 0) >= 55 ? 'var(--warn)' : 'var(--bad)') + '<div style="flex:1">' +
+      Object.keys(s.parts).map(function (k) { return hbar(k, (s.parts[k] || 0) / 100, 'var(--c2)', s.parts[k] === null ? '—' : Math.round(s.parts[k])); }).join('') + '</div></div></div>' +
+      '<div class="card"><div class="card-h"><div><h2>Daily activity</h2><p>Bars = messages · line = conversations · last 14 days</p></div></div>' + dailyChart(c) + '</div></div>';
+    var maxLat = Math.max.apply(null, s.lat.concat([1])), maxDep = Math.max.apply(null, s.dep.concat([1])), latCol = ['var(--ok)', 'var(--ok)', 'var(--warn)', 'var(--bad)', 'var(--bad)'];
+    h += '<div class="grid g2 mt"><div class="card"><div class="card-h"><div><h2>Reply speed</h2><p>How long people wait for an answer</p></div><span class="tag ' + (s.p95 !== null && s.p95 > T.p95Ms ? 'r' : 'g') + '">p50 ' + (s.p50 === null ? '—' : (s.p50 / 1000).toFixed(1) + ' s') + ' · p95 ' + (s.p95 === null ? '—' : (s.p95 / 1000).toFixed(1) + ' s') + '</span></div>' +
+      CFG.chat.latencyBuckets.map(function (b, i) { return hbar(b[1], s.lat[i] / maxLat, latCol[i], s.latN ? Math.round(s.lat[i] / s.latN * 100) + '%' : '—'); }).join('') + '<div class="muted" style="margin-top:.4rem">Percentiles are estimated from time buckets.</div></div>' +
+      '<div class="card"><div class="card-h"><div><h2>Conversation depth</h2><p>Messages per conversation</p></div><span class="tag">' + (s.depth === null ? '—' : s.depth.toFixed(1) + ' avg') + '</span></div>' +
+      CFG.chat.depthBuckets.map(function (b, i) { return hbar(b[1], s.dep[i] / maxDep, 'var(--c1)', s.depN ? Math.round(s.dep[i] / s.depN * 100) + '%' : '—'); }).join('') + '<div class="muted" style="margin-top:.4rem">' + (s.followUp === null ? '' : pc(s.followUp) + ' of conversations continue past the first answer · ' + pc(s.deep) + ' go 3+ messages') + '</div></div></div>';
+    var tTot = sumA(CFG.chat.topics.map(function (t) { return c.tot['chat_topic_' + t[0]] || 0; })), tMax = Math.max.apply(null, CFG.chat.topics.map(function (t) { return c.tot['chat_topic_' + t[0]] || 0; }).concat([1]));
+    h += '<div class="grid g2 mt"><div class="card"><div class="card-h"><div><h2>Answer feedback</h2><p>👍 / 👎 on replies</p></div></div>' + (s.votes ? '<div style="display:flex;height:16px;border-radius:99px;overflow:hidden;background:var(--track)"><i style="width:' + (s.up / s.votes * 100) + '%;background:var(--ok)"></i><i style="width:' + (s.down / s.votes * 100) + '%;background:var(--bad)"></i></div><div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.82rem"><span>👍 ' + fmt(s.up) + '</span><span class="muted">' + pc(s.csat) + ' positive</span><span>👎 ' + fmt(s.down) + '</span></div>' : '<div class="empty">No ratings yet</div>') +
+      '<div style="margin-top:.9rem">' + hbar('Rated', s.feedbackRate || 0, 'var(--c2)', pc(s.feedbackRate)) + hbar('Regenerated', s.regenRate || 0, 'var(--warn)', pc(s.regenRate)) + hbar('Copied', s.copyRate || 0, 'var(--c3)', pc(s.copyRate)) + '</div></div>' +
+      '<div class="card"><div class="card-h"><div><h2>What people ask about</h2><p>Topics are detected on the visitor\'s device; message text is never stored</p></div></div>' + (tTot ? CFG.chat.topics.map(function (t) { var v = c.tot['chat_topic_' + t[0]] || 0; return hbar(t[1], v / tMax, 'var(--c2)', Math.round(v / tTot * 100) + '%'); }).join('') : '<div class="empty">Pass the user\'s text to messageSent() to see topics</div>') + '</div></div>';
+    var started = Math.min(s.convos, s.sessions || s.convos), cont = s.followUp === null ? 0 : Math.round(started * s.followUp), fs = [['Visits', Math.max(s.visits, s.sessions)], ['Sessions', s.sessions], ['Started a chat', started], ['Continued (2+ msgs)', cont], ['Rated 👍', Math.min(s.up, cont || s.up)]], fmax = Math.max(1, fs[0][1]);
+    h += '<div class="card mt"><div class="card-h"><div><h2>Chat funnel</h2><p>From visit to a happy conversation</p></div></div><div class="fun">' + fs.map(function (x, i) { var conv = i ? (fs[i - 1][1] ? x[1] / fs[i - 1][1] : 0) : 1; return '<div class="row"><span class="muted">' + x[0] + '</span><div class="b" style="width:' + Math.max(1, x[1] / fmax * 100) + '%"></div><b class="num">' + fmt(x[1]) + '</b></div>' + (i ? '<div class="muted" style="margin:-.15rem 0 .1rem 92px">↳ ' + pc(conv) + ' of previous step</div>' : ''); }).join('') + '</div></div>';
+    var ins = chatInsights(s).sort(function (a, b) { return b.score - a.score; });
+    h += '<div class="card mt"><div class="card-h"><div><h2>What to improve</h2><p>Specific to the chatbot</p></div></div>' + (ins.length ? ins.map(function (x, i) { return '<div style="display:flex;gap:.8rem;padding:.7rem 0;border-top:' + (i ? '1px solid var(--line)' : '0') + '"><span class="tag ' + x.sev + '" style="height:fit-content">' + (x.sev === 'r' ? 'Urgent' : x.sev === 'a' ? 'Soon' : 'Good news') + '</span><div><b style="font-size:.88rem">' + esc(x.title) + '</b><div style="font-size:.8rem;color:var(--tx2);margin-top:2px">' + esc(x.detail) + '</div></div></div>'; }).join('') : '<div class="empty">' + (has ? 'Nothing needs attention right now.' : 'Recommendations appear once the chatbot has data.') + '</div>') + '</div>';
+    h += sbCard() + integrationCard();
+    return h;
+  };
+  function sbCard() {
+    var sb = EXT.sb, ok = S.supabase && S.supabase.url && S.supabase.key;
+    return '<div class="card mt"><div class="card-h"><div><h2>Exact metrics (Supabase, optional)</h2><p>Real percentiles and unique visitors from your own database. Run <code class="k">analytics-events.sql</code> once, then add the URL and anon key to the tracker tag.</p></div>' + (ok ? '<button class="btn sm" data-act="load-sb">Load</button>' : '') + '</div>' +
+      '<div class="grid g2" style="gap:.6rem"><label class="muted">Project URL<input class="inp" data-set="supabase.url" placeholder="https://xxxx.supabase.co" value="' + esc((S.supabase || {}).url) + '"></label><label class="muted">Anon (public) key<input class="inp" data-set="supabase.key" placeholder="eyJ…" value="' + esc((S.supabase || {}).key) + '"></label></div>' +
+      (sb && sb.error ? '<div class="muted" style="margin-top:.6rem;color:var(--bad)">' + esc(sb.error) + '</div>' : '') +
+      (sb && sb.data ? '<div style="display:flex;gap:1.6rem;flex-wrap:wrap;margin-top:.9rem">' + [['Visitors', sb.data.visitors], ['Conversations', sb.data.conversations], ['p50', sb.data.p50_ms === null ? '—' : Math.round(sb.data.p50_ms) + ' ms'], ['p95', sb.data.p95_ms === null ? '—' : Math.round(sb.data.p95_ms) + ' ms'], ['p99', sb.data.p99_ms === null ? '—' : Math.round(sb.data.p99_ms) + ' ms'], ['Msgs / chat', sb.data.avg_messages_per_conversation === null ? '—' : (+sb.data.avg_messages_per_conversation).toFixed(1)]].map(function (x) { return '<div><div class="num" style="font-size:1.25rem;font-weight:700">' + (typeof x[1] === 'number' ? x[1].toLocaleString() : x[1]) + '</div><div class="muted">' + x[0] + ' · 14d</div></div>'; }).join('') + '</div>' : '') + '</div>';
+  }
+  function integrationSnippet() {
+    return '<!-- 1. load the tracker once, before your chat code -->\n<script src="tracker.js" data-site="nexora" async></' + 'script>\n\n// 2. inside your chat code\nconst chat = window.AnalysisTracker && window.AnalysisTracker.chat;\n\n// when the user sends a message\nchat && chat.messageSent(userText);       // the text stays on the device; only a topic label is counted\n\n// around the model call\nconst done = chat && chat.replyStarted();\ntry {\n  const answer = await askModel(userText);\n  done && done();                         // success: reply + latency counted\n} catch (e) {\n  done && done(false);                    // failure: error counted\n}\n\n// on your buttons\nchat && chat.feedback("up");              // or "down"\nchat && chat.regenerate();\nchat && chat.copied();\nchat && chat.newConversation();           // "New chat" button';
+  }
+  function integrationCard() {
+    return '<div class="card mt" id="integ"><div class="card-h"><div><h2>Integration</h2><p>Add these calls to the Nexora AI site (' + esc(siteById(CFG.chat.siteId).url.replace('https://', '')) + ')</p></div><button class="btn sm" data-act="copy-snippet">Copy</button></div><pre>' + esc(integrationSnippet()) + '</pre>' +
+      '<div class="muted" style="margin-top:.7rem;line-height:1.6">Privacy: no message text, names or emails are collected. Visitors who send Do Not Track or Global Privacy Control are skipped. Counts appear here within a minute; ratings need visible 👍 / 👎 buttons.</div></div>';
+  }
+
+  /* ---------- audience view ---------- */
+  V.audience = function () {
+    var sid = S.audSite || 'nexora', a = EXT.aud[sid];
+    var seg = '<div class="seg2" role="group" aria-label="Site">' + CFG.sites.map(function (s) { return '<button class="btn sm ' + (s.id === sid ? 'pri' : '') + '" data-act="aud-site" data-v="' + s.id + '" aria-pressed="' + (s.id === sid) + '">' + esc(s.name) + '</button>'; }).join(' ') + '</div>';
+    var h = head('Audience & acquisition', 'Where visitors come from and <span class="grad">whether they return</span>', 'Traffic sources, devices, new vs returning visitors, day-1 and day-7 retention, and a funnel you can shape with your own events.', seg + ' <button class="btn ' + (S.demo ? 'pri' : '') + '" data-act="toggle-demo">' + (S.demo ? 'Demo data on' : 'Demo data') + '</button>');
+    if (!a) return h + '<div class="empty">Loading audience data…</div>';
+    if (S.demo) h += '<div class="card" style="margin-bottom:1rem;border-color:rgba(251,191,36,.5)"><b>Demo data</b> <span class="muted">— made-up numbers for preview.</span></div>';
+    var srcT = sumA(Object.keys(a.src).map(function (k) { return a.src[k]; })), devT = sumA(Object.keys(a.dev).map(function (k) { return a.dev[k]; })), vis = a.newT + a.retT;
+    var c1 = a.ret.filter(function (r) { return r.r1 !== null && r.newN > 0; }), c7 = a.ret.filter(function (r) { return r.r7 !== null && r.newN > 0; });
+    var d1 = c1.length ? sumA(c1.map(function (r) { return r.r1; })) / sumA(c1.map(function (r) { return r.newN; })) : null, d7 = c7.length ? sumA(c7.map(function (r) { return r.r7; })) / sumA(c7.map(function (r) { return r.newN; })) : null;
+    var pc = function (v) { return v === null ? '—' : Math.round(v * 100) + '%'; };
+    var kpi = function (l, v, d) { return '<div class="card kpi"><div class="l">' + l + '</div><div class="v">' + v + '</div><div class="d fl">' + d + '</div></div>'; };
+    h += '<div class="grid g4">' + kpi('Returning visitors', vis ? pc(a.retT / vis) : '—', fmt(a.retT) + ' returning · ' + fmt(a.newT) + ' new') + kpi('Day-1 retention', pc(d1), c1.length ? 'from ' + c1.length + ' cohorts' : 'needs 2+ days of data') + kpi('Day-7 retention', pc(d7), c7.length ? 'from ' + c7.length + ' cohorts' : 'needs 8+ days of data') + kpi('Mobile share', devT ? pc((a.dev.mobile || 0) / devT) : '—', fmt(devT) + ' sessions with device data') + '</div>';
+    h += '<div class="grid g2 mt"><div class="card"><div class="card-h"><div><h2>Traffic sources</h2><p>Where sessions start</p></div></div>' + (srcT ? CFG.sources.map(function (x) { return hbar(x[1], (a.src[x[0]] || 0) / Math.max(1, srcT), 'var(--c1)', Math.round((a.src[x[0]] || 0) / srcT * 100) + '%'); }).join('') : '<div class="empty">No source data yet — needs tracker v2 on this site</div>') + '</div>' +
+      '<div class="card"><div class="card-h"><div><h2>Devices</h2><p>Desktop vs mobile</p></div></div>' + (devT ? '<div style="display:flex;height:18px;border-radius:99px;overflow:hidden;background:var(--track)">' + CFG.devices.map(function (x, i) { return '<i style="width:' + (a.dev[x[0]] || 0) / devT * 100 + '%;background:' + (i ? 'var(--c2)' : 'var(--c1)') + '"></i>'; }).join('') + '</div><div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.82rem">' + CFG.devices.map(function (x) { return '<span>' + x[1] + ' <b>' + Math.round((a.dev[x[0]] || 0) / devT * 100) + '%</b></span>'; }).join('') + '</div>' : '<div class="empty">No device data yet</div>') + '</div></div>';
+    h += '<div class="card mt"><div class="card-h"><div><h2>Cohort retention</h2><p>People whose first visit was on that day, and how many came back</p></div></div><div class="tw"><table class="t"><thead><tr><th>First visit</th><th>New visitors</th><th>Day 1</th><th>Day 7</th></tr></thead><tbody>' +
+      a.ret.slice().reverse().filter(function (r) { return r.newN > 0 || r.r1 !== null; }).map(function (r) { var f = function (v) { return v === null ? '<span class="muted">pending</span>' : '<b class="num">' + (r.newN ? Math.round(v / r.newN * 100) + '%' : '—') + '</b> <span class="muted">(' + v + ')</span>'; }; return '<tr><td>' + r.day.slice(0, 4) + '-' + r.day.slice(4, 6) + '-' + r.day.slice(6) + '</td><td class="num">' + r.newN + '</td><td>' + f(r.r1) + '</td><td>' + f(r.r7) + '</td></tr>'; }).join('') + '</tbody></table></div>' + (a.ret.some(function (r) { return r.newN > 0; }) ? '' : '<div class="empty">No cohorts yet — retention builds up day by day once tracker v2 is live.</div>') + '</div>';
+    var steps = funnelFor(sid), vals = steps.map(function (st) { var r = row_(sid); if (st[1] === 'views') return r ? r.total : 0; if (st[1] === 'sessions') return r ? r.sessions : 0; if (st[1] === 'engaged') return r ? r.engaged : 0; return a.stepVals[st[1]] || 0; }), mxv = Math.max(1, vals[0]), worst = null;
+    vals.forEach(function (v, i) { if (i && vals[i - 1] > 0) { var drop = 1 - v / vals[i - 1]; if (!worst || drop > worst.drop) worst = { drop: drop, from: steps[i - 1][0], to: steps[i][0] }; } });
+    h += '<div class="card mt"><div class="card-h"><div><h2>Funnel</h2><p>Steps come from your own events: <code class="k">AnalysisTracker.track("login")</code></p></div><button class="btn sm" data-act="edit-funnel">Edit steps</button></div><div class="fun">' + steps.map(function (st, i) { var conv = i ? (vals[i - 1] ? vals[i] / vals[i - 1] : 0) : 1; return '<div class="row"><span class="muted">' + esc(st[0]) + '</span><div class="b" style="width:' + Math.max(1, vals[i] / mxv * 100) + '%"></div><b class="num">' + fmt(vals[i]) + '</b></div>' + (i ? '<div class="muted" style="margin:-.15rem 0 .1rem 92px">↳ ' + pc(conv) + ' of previous step</div>' : ''); }).join('') + '</div>' + (worst ? '<div style="margin-top:.8rem;font-size:.84rem;color:var(--tx2)">Biggest drop-off: <b>' + esc(worst.from) + ' → ' + esc(worst.to) + '</b> (−' + Math.round(worst.drop * 100) + '%).</div>' : '') + '</div>';
+    return h;
+  };
+
+  /* ---------- web vitals card (Reliability tab) ---------- */
+  function vitalsCard() {
+    var v = EXT.vit; if (!v) return '<div class="card mt"><div class="empty">Loading performance data…</div></div>';
+    var cell = function (m) { var t = m.good + m.ni + m.poor; if (!t) return '<span class="muted">no data</span>'; return '<div style="display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--track)"><i style="width:' + m.good / t * 100 + '%;background:var(--ok)"></i><i style="width:' + m.ni / t * 100 + '%;background:var(--warn)"></i><i style="width:' + m.poor / t * 100 + '%;background:var(--bad)"></i></div><div class="muted" style="margin-top:.25rem">' + Math.round(m.good / t * 100) + '% good · ' + t + ' loads</div>'; };
+    return '<div class="card mt"><div class="card-h"><div><h2>Page speed &amp; errors</h2><p>Real visitors\' Core Web Vitals (green = good) and JavaScript errors</p></div>' + (v.demo ? '<span class="tag a">demo</span>' : '') + '</div><div class="tw"><table class="t"><thead><tr><th>Site</th>' + CFG.vitals.map(function (m) { return '<th>' + m[1] + '<br><span style="text-transform:none;letter-spacing:0;font-weight:500">good ' + m[2] + '</span></th>'; }).join('') + '<th>JS errors</th></tr></thead><tbody>' +
+      CFG.sites.map(function (s) { var e = v.sites[s.id], per = e.sessions ? e.jserr / e.sessions * 100 : null; return '<tr><td><b>' + esc(s.name) + '</b></td>' + CFG.vitals.map(function (m) { return '<td style="min-width:130px">' + cell(e[m[0]]) + '</td>'; }).join('') + '<td><b class="num">' + fmt(e.jserr) + '</b> <span class="muted">' + (per === null ? '' : per.toFixed(1) + ' / 100 sessions') + '</span></td></tr>'; }).join('') + '</tbody></table></div></div>';
+  }
+
+  /* ---------- channels, digest html, changelog ---------- */
+  function sendChannels(msg) {
+    var c = S.channels || {}, noop = function () {};
+    try {
+      if (c.discord) fetch(c.discord, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: msg }) }).catch(noop);
+      if (c.slack) fetch(c.slack, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ text: msg }) }).catch(noop);
+      if (c.tgToken && c.tgChat) fetch('https://api.telegram.org/bot' + encodeURIComponent(c.tgToken) + '/sendMessage?chat_id=' + encodeURIComponent(c.tgChat) + '&text=' + encodeURIComponent(msg)).catch(noop);
+    } catch (e) { /* ignore */ }
+  }
+  function channelsCard() {
+    var c = S.channels || {}, on = !!(c.discord || c.slack || (c.tgToken && c.tgChat));
+    return '<div class="card mt"><div class="card-h"><div><h2>Alert channels</h2><p>Send new alerts to your chat apps while this workspace is open</p></div><button class="btn sm" data-act="test-channels"' + (on ? '' : ' disabled') + '>Send test</button></div><div class="grid g2" style="gap:.7rem">' +
+      '<label class="muted">Discord webhook URL<input class="inp" data-set="channels.discord" placeholder="https://discord.com/api/webhooks/…" value="' + esc(c.discord) + '"></label><label class="muted">Slack webhook URL<input class="inp" data-set="channels.slack" placeholder="https://hooks.slack.com/services/…" value="' + esc(c.slack) + '"></label>' +
+      '<label class="muted">Telegram bot token<input class="inp" data-set="channels.tgToken" value="' + esc(c.tgToken) + '"></label><label class="muted">Telegram chat ID<input class="inp" data-set="channels.tgChat" value="' + esc(c.tgChat) + '"></label></div>' +
+      '<div class="muted" style="margin-top:.7rem;line-height:1.6">These secrets are stored only in this browser. Anyone with a webhook URL can post to your channel, so never share a backup file that contains them. Alerts are only sent while this page is open.</div></div>';
+  }
+  function mdToHtml(md) {
+    var out = [], inList = false;
+    md.split('\n').forEach(function (l) {
+      var t = esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+      if (/^# /.test(l)) { if (inList) { out.push('</ul>'); inList = false; } out.push('<h1>' + t.slice(2) + '</h1>'); }
+      else if (/^## /.test(l)) { if (inList) { out.push('</ul>'); inList = false; } out.push('<h2>' + t.slice(3) + '</h2>'); }
+      else if (/^\s*- /.test(l) || /^\d+\. /.test(l)) { if (!inList) { out.push('<ul>'); inList = true; } out.push('<li style="margin-left:' + (/^\s+/.test(l) ? 18 : 0) + 'px">' + t.replace(/^\s*(- |\d+\. )/, '') + '</li>'); }
+      else if (l.trim()) { if (inList) { out.push('</ul>'); inList = false; } out.push('<p>' + t + '</p>'); }
+    });
+    if (inList) out.push('</ul>');
+    return out.join('\n');
+  }
+  function changelogCard() {
+    var rel = S.releases.map(function (r, i) { return { r: r, i: i }; }).sort(function (a, b) { return b.r.date.localeCompare(a.r.date) || b.r.version.localeCompare(a.r.version, undefined, { numeric: true }); });
+    return '<div class="card mt"><div class="card-h"><div><h2>Changelog</h2><p>Publish release notes as <code class="k">changelog.json</code> — the public page <a href="./changelog.html">changelog.html</a> shows it</p></div><div style="display:flex;gap:.3rem"><button class="btn sm" data-act="dl-changelog">Download JSON</button><button class="btn sm pri" data-act="add-release">+ Release note</button></div></div>' +
+      (rel.length ? rel.slice(0, 12).map(function (x) { var r = x.r; return '<div style="display:flex;gap:.7rem;align-items:flex-start;padding:.6rem 0;border-top:1px solid var(--line);font-size:.83rem"><span class="tag ' + (r.type === 'fix' ? 'a' : r.type === 'feature' ? 'b' : 'g') + '">' + esc(r.type) + '</span><div style="flex:1"><b>' + esc(r.title) + '</b> <span class="muted">v' + esc(r.version) + ' · ' + esc(r.date) + '</span><div class="muted" style="font-size:.78rem">' + esc(r.notes) + '</div></div><button class="btn sm dng" data-act="del" data-arr="releases" data-i="' + x.i + '" aria-label="Delete release note">✕</button></div>'; }).join('') : '<div class="empty">No release notes yet.</div>') + '</div>';
+  }
+
+  /* ================= weekly business review ================= */
+  function wbr() {
+    var live = D.rows.filter(function (r) { return !r.unavailable; }), L = [];
+    var w7 = live.reduce(function (t, r) { return t + r.recent7; }, 0), p7 = live.reduce(function (t, r) { return t + r.prior7; }, 0);
+    L.push('# Weekly Business Review — ' + isoDay(Date.now()), '');
+    L.push('## North star', '- Weekly views: **' + fmt(w7) + '**' + (p7 ? ' (' + (w7 >= p7 ? '+' : '') + Math.round((w7 - p7) / p7 * 100) + '% vs last week)' : ''), '');
+    L.push('## Product health');
+    D.rows.forEach(function (r) { var h = health(r); L.push('- [' + h.st.toUpperCase() + '] **' + r.name + '**' + (r.rank ? ' — ' + r.ordinal + ', ' + r.score.toFixed(1) + ' pts' : '') + ' — ' + fmt(r.recent7) + ' views this week. ' + h.reasons.join('; ') + '.'); });
+    L.push('', '## OKRs');
+    S.okrs.forEach(function (o) { L.push('- **' + o.objective + '** — ' + Math.round(objProg(o) * 100) + '%'); o.krs.forEach(function (k) { var c = krCur(k); L.push('  - ' + k.text + ': ' + (c === null ? 'n/a' : Math.round(c * 10) / 10) + ' / ' + k.target + ' (confidence ' + k.conf + '/10)'); }); });
+    L.push('', '## Top priorities (RICE)');
+    S.roadmap.filter(function (i) { return i.lane !== 'done'; }).sort(function (a, b) { return rice(b) - rice(a); }).slice(0, 5).forEach(function (it, i) { L.push((i + 1) + '. ' + it.title + ' (' + prodName(it.product) + ', RICE ' + rice(it).toFixed(0) + ', ' + it.lane + ')'); });
+    var sp = sprintStats(S.sprint);
+    L.push('', '## Sprint', '- ' + S.sprint.name + ': ' + sp.cum + '/' + S.sprint.committed + ' points, velocity ' + sp.vel.toFixed(1) + '/day — **' + sp.st[0] + '**', '', '## Reliability (SLO ' + S.slo + '%)');
+    CFG.sites.forEach(function (s) { var r = rel(s.id); L.push('- ' + s.name + ': ' + (r.avail === null ? 'no data' : (r.avail * 100).toFixed(2) + '% available, p95 ' + (r.p95 === null ? 'n/a' : r.p95 + ' ms') + ', error budget ' + Math.round(r.budget * 100) + '% left')); });
+    var cs = !S.demo && EXT.chat ? chatStats(EXT.chat) : null;
+    if (cs && (cs.msgs || cs.replies)) {
+      L.push('', '## Chatbot (Nexora AI)', '- Conversations (7d): **' + cs.convos7 + '**, messages: **' + cs.msgs7 + '**' + (cs.wow === null ? '' : ' (' + (cs.wow >= 0 ? '+' : '') + Math.round(cs.wow * 100) + '% vs last week)'));
+      L.push('- Satisfaction: ' + (cs.csat === null ? 'no ratings yet' : Math.round(cs.csat * 100) + '% positive of ' + cs.votes + ' ratings') + '; error rate: ' + (cs.errorRate === null ? 'n/a' : (cs.errorRate * 100).toFixed(1) + '%'));
+      L.push('- Reply time: median ' + (cs.p50 === null ? 'n/a' : (cs.p50 / 1000).toFixed(1) + ' s') + ', p95 ' + (cs.p95 === null ? 'n/a' : (cs.p95 / 1000).toFixed(1) + ' s') + '; health score **' + (cs.health === null ? 'n/a' : Math.round(cs.health)) + '/100**');
+      chatInsights(cs).filter(function (x) { return x.sev !== 'g'; }).slice(0, 3).forEach(function (x) { L.push('- Action: ' + x.title); });
+    }
+    L.push('', '## Experiments');
+    S.experiments.forEach(function (e) { L.push('- ' + e.name + ': ' + expStats(e).decision); });
+    L.push('', '## Open risks');
+    S.risks.filter(function (r) { return r.status !== 'Closed'; }).sort(function (a, b) { return b.likelihood * b.impact - a.likelihood * a.impact; }).slice(0, 3).forEach(function (r) { L.push('- ' + r.title + ' (score ' + r.likelihood * r.impact + ') — ' + r.mitigation); });
+    return L.join('\n');
+  }
+
+  /* ================= render + routing ================= */
+  function render() {
+    $('tabs').innerHTML = TABS.map(function (t) { return '<button class="tab' + (t[0] === cur ? ' on' : '') + '" role="tab" aria-selected="' + (t[0] === cur) + '" data-act="tab" data-v="' + t[0] + '">' + esc(tl(t[0], t[1])) + '</button>'; }).join('');
+    var lk = document.querySelectorAll('[data-i18n]'); Array.prototype.forEach.call(lk, function (el) { el.textContent = tl(el.getAttribute('data-i18n'), el.getAttribute('data-def')); });
+    var y = window.scrollY; $('view').innerHTML = V[cur](); window.scrollTo(0, y);
+    var st = $('status'); st.className = 'chip-s ' + D.status; $('statusTxt').textContent = { live: 'Live data', partial: 'Partial data', cached: 'Cached data', offline: 'Offline', connecting: 'Connecting' }[D.status];
+  }
+  function ensure(id, force) {
+    var sid = S.audSite || 'nexora';
+    if (id === 'audience' && (force || !EXT.aud[sid])) loadAud(sid).then(function () { if (cur === 'audience') render(); });
+    if (id === 'reliability' && (force || !EXT.vit)) loadVit().then(function () { if (cur === 'reliability') render(); });
+  }
+  function go(id) { if (!V[id]) id = 'overview'; cur = id; if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id); render(); window.scrollTo(0, 0); ensure(id); }
+
+  async function loadData() {
+    try {
+      var w = Object.assign({}, CFG.weights, JSON.parse(localStorage.getItem('nexora_rank_weights_v2') || 'null') || {});
+      var d = await R.compute({ weights: w, method: localStorage.getItem('nexora_rank_method_v1') || CFG.method });
+      D.rows = d.rows; D.status = d.status; D.at = d.at;
+    } catch (e) { D.status = 'offline'; }
+    await loadChat();
+    evaluateAlerts(); render(); ensure(cur, true);
+  }
+  async function probe(site) {
+    var t0 = performance.now(), ctrl = new AbortController(), to = setTimeout(function () { ctrl.abort(); }, 8000);
+    try { await fetch(site.url + (site.url.indexOf('?') > -1 ? '&' : '?') + '_tg=' + Date.now(), { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal }); return { t: Date.now(), ok: true, ms: Math.round(performance.now() - t0) }; }
+    catch (e) { return { t: Date.now(), ok: false, ms: null }; } finally { clearTimeout(to); }
+  }
+  async function runProbes(manual) {
+    var res = await Promise.all(CFG.sites.map(probe));
+    CFG.sites.forEach(function (s, i) { var a = S.uptime[s.id] || (S.uptime[s.id] = []); a.push(res[i]); if (a.length > 300) a.splice(0, a.length - 300); });
+    save(); evaluateAlerts(); if (cur === 'reliability' || cur === 'overview' || cur === 'activity') render();
+    if (manual) toast('Probed ' + CFG.sites.length + ' sites');
+  }
+
+  /* ================= actions ================= */
+  var ACT = {
+    tab: function (el) { go(el.dataset.v); },
+    wbr: function () { var c = $('wbrCard'); $('wbrOut').textContent = wbr(); c.style.display = 'block'; c.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
+    'wbr-copy': function () { copy($('wbrOut').textContent, 'Report copied'); },
+    'wbr-dl': function () { download('weekly-business-review-' + isoDay(Date.now()) + '.md', wbr(), 'text/markdown'); },
+    del: function (el) { if (!confirm('Delete this item?')) return; logAct('Deleted an item from ' + el.dataset.arr, 'delete'); S[el.dataset.arr].splice(Number(el.dataset.i), 1); save(); render(); },
+    'del-kr': function (el) { S.okrs[el.dataset.i].krs.splice(Number(el.dataset.k), 1); save(); render(); },
+    'add-okr': function () { modal('New objective', [{ name: 'objective', label: 'Objective', required: true }, [{ name: 'owner', label: 'Owner', value: 'You' }, { name: 'quarter', label: 'Quarter', value: 'Q4 2026' }]], function (v) { S.okrs.push({ id: uid(), objective: v.objective, owner: v.owner, quarter: v.quarter, krs: [] }); logAct('Added objective “' + v.objective + '”', 'okr'); save(); render(); toast('Objective added'); }); },
+    'add-kr': function (el) {
+      var oi = Number(el.dataset.i), sites = CFG.sites.map(function (s) { return [s.id, s.name]; });
+      modal('New key result', [{ name: 'text', label: 'Key result', required: true },
+        { name: 'type', label: 'Value comes from', type: 'select', options: [['auto', 'Live traffic data'], ['manual', 'Manual entry']] },
+        [{ name: 'site', label: 'Site (live only)', type: 'select', options: sites }, { name: 'metric', label: 'Metric (live only)', type: 'select', options: [['views7', 'Views in last 7 days'], ['views', 'Lifetime views'], ['sessions', 'Sessions'], ['engRate', 'Engagement rate %'], ['score', 'Ranking score']].concat(Object.keys(KRM).map(function (k) { return [k, KRM[k][0]]; })) }],
+        [{ name: 'start', label: 'Start value', type: 'number', value: 0 }, { name: 'target', label: 'Target', type: 'number', value: 100 }]], function (v) {
+        S.okrs[oi].krs.push({ id: uid(), text: v.text, type: v.type, site: v.site, metric: v.metric, start: v.start, target: v.target, current: 0, conf: 5 }); logAct('Added key result “' + v.text + '”', 'okr'); save(); render(); toast('Key result added'); });
+    },
+    'add-item': function () { itemModal(null); },
+    'edit-item': function (el) { itemModal(Number(el.dataset.i)); },
+    move: function (el) { var order = ['now', 'next', 'later', 'done'], it = S.roadmap[el.dataset.i], i = clamp(order.indexOf(it.lane) + Number(el.dataset.d), 0, 3); it.lane = order[i]; logAct('Moved “' + it.title + '” to ' + it.lane, 'roadmap'); save(); render(); },
+    'add-exp': function () { modal('New experiment', [{ name: 'name', label: 'Name', required: true }, { name: 'metric', label: 'Success metric', value: 'Conversion' }], function (v) { S.experiments.push({ id: uid(), name: v.name, metric: v.metric, variants: [{ name: 'A · Control', n: 0, c: 0 }, { name: 'B · Variant', n: 0, c: 0 }] }); logAct('Created experiment “' + v.name + '”', 'experiment'); save(); render(); }); },
+    'add-variant': function (el) { var e = S.experiments[el.dataset.i]; e.variants.push({ name: String.fromCharCode(65 + e.variants.length) + ' · Variant', n: 0, c: 0 }); save(); render(); },
+    'add-flag': function () { modal('New feature flag', [{ name: 'key', label: 'Key (kebab-case)', required: true }, { name: 'desc', label: 'Description' }, [{ name: 'rollout', label: 'Rollout %', type: 'number', value: 0, min: 0 }, { name: 'env', label: 'Environments', type: 'select', options: [['dev', 'dev'], ['dev,prod', 'dev + prod'], ['prod', 'prod']] }]], function (v) { S.flags.push({ key: v.key.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-'), desc: v.desc, on: false, rollout: clamp(v.rollout, 0, 100), env: v.env.split(','), owner: 'You' }); logAct('Created flag ' + v.key, 'flag'); save(); render(); toast('Flag created (off)'); }); },
+    'copy-flags': function () { copy(JSON.stringify(S.flags.map(function (f) { return { key: f.key, on: f.on, rollout: f.rollout, env: f.env }; }), null, 2), 'Flags JSON copied'); },
+    'add-adr': function () { modal('Log a decision', [{ name: 'title', label: 'Title', required: true }, { name: 'context', label: 'Context', type: 'textarea' }, { name: 'decision', label: 'Decision', type: 'textarea' }, { name: 'status', label: 'Status', type: 'select', options: ['Proposed', 'Accepted', 'Superseded'], value: 'Accepted' }], function (v) { S.decisions.push({ id: uid(), date: isoDay(Date.now()), title: v.title, context: v.context, decision: v.decision, status: v.status }); logAct('Logged decision “' + v.title + '”', 'decision'); save(); render(); }); },
+    'add-risk': function () { modal('Log a risk', [{ name: 'title', label: 'Risk', required: true }, [{ name: 'likelihood', label: 'Likelihood (1-5)', type: 'number', value: 3, min: 1 }, { name: 'impact', label: 'Impact (1-5)', type: 'number', value: 3, min: 1 }], { name: 'mitigation', label: 'Mitigation', type: 'textarea' }], function (v) { S.risks.push({ id: uid(), title: v.title, likelihood: clamp(v.likelihood, 1, 5), impact: clamp(v.impact, 1, 5), owner: 'You', mitigation: v.mitigation, status: 'Open' }); logAct('Logged risk “' + v.title + '”', 'risk'); save(); render(); }); },
+    probe: function () { runProbes(true); },
+    'edit-sprint': function () { var sp = S.sprint; modal('Edit sprint', [{ name: 'name', label: 'Name', value: sp.name }, [{ name: 'start', label: 'Start date', type: 'date', value: sp.start }, { name: 'days', label: 'Length (days)', type: 'number', value: sp.days, min: 1 }], { name: 'committed', label: 'Committed points', type: 'number', value: sp.committed, min: 1 }], function (v) { sp.name = v.name; sp.start = v.start; sp.days = clamp(Math.round(v.days), 1, 30); sp.committed = Math.max(1, v.committed); while (sp.done.length < sp.days) sp.done.push(null); sp.done.length = sp.days; save(); render(); }); },
+    'close-sprint': function () {
+      var st = sprintStats(S.sprint); if (!confirm('Close "' + S.sprint.name + '" with velocity ' + st.cum + ' and start a new sprint?')) return;
+      S.sprints.push({ name: S.sprint.name, velocity: st.cum });
+      var n = S.sprint.name.match(/(\d+)\s*$/), next = n ? S.sprint.name.replace(/\d+\s*$/, String(Number(n[1]) + 1)) : 'Next sprint';
+      S.sprint = { name: next, start: isoDay(Date.now()), days: S.sprint.days, committed: Math.round(S.sprints.slice(-3).reduce(function (t, x) { return t + x.velocity; }, 0) / Math.min(3, S.sprints.length)) || S.sprint.committed, done: Array(S.sprint.days).fill(null) };
+      logAct('Closed ' + S.sprints[S.sprints.length - 1].name + ' with velocity ' + st.cum, 'sprint'); save(); render(); toast('Sprint closed — committed ' + S.sprint.committed + ' pts based on velocity');
+    },
+    'export-all': function () { download('analysis-workspace-backup.json', JSON.stringify(S, null, 2), 'application/json'); },
+    'import-all': function () { $('importFile').click(); },
+    reset: function () { if (!confirm('Replace ALL workspace data with the sample data?')) return; S = norm(seed()); logAct('Restored sample data', 'info'); save(); render(); toast('Sample data restored'); }
+  };
+  ACT['refresh-data'] = function () { loadData(); toast('Refreshing…'); };
+  ACT['toggle-notify'] = function () {
+    if (!('Notification' in window)) { toast('Notifications are not supported here'); return; }
+    if (S.notify && Notification.permission === 'granted') { S.notify = false; save(); render(); toast('Notifications off'); return; }
+    Notification.requestPermission().then(function (p) { S.notify = p === 'granted'; save(); render(); toast(p === 'granted' ? 'Notifications on' : 'Permission not granted'); });
+  };
+  ACT['toggle-demo'] = function () { S.demo = !S.demo; EXT.chat = null; EXT.aud = {}; EXT.vit = null; save(); render(); loadChat().then(function () { evaluateAlerts(); render(); ensure(cur, true); }); toast(S.demo ? 'Demo data on' : 'Demo data off'); };
+  ACT['aud-site'] = function (el) { S.audSite = el.dataset.v; save(); render(); ensure('audience'); };
+  ACT['edit-funnel'] = function () {
+    var sid = S.audSite || 'nexora';
+    modal('Edit funnel steps', [{ name: 'steps', label: 'One step per line:  Label | metric   (metrics: views, sessions, engaged, returning, new, chat_convos, chat_msgs, ev:your_event)', type: 'textarea', value: funnelFor(sid).map(function (x) { return x[0] + ' | ' + x[1]; }).join('\n') }], function (v) {
+      var steps = v.steps.split('\n').map(function (l) { var p = l.split('|'); return [(p[0] || '').trim(), (p[1] || '').trim().toLowerCase().replace(/[^a-z0-9:_]/g, '')]; }).filter(function (x) { return x[0] && x[1]; });
+      if (steps.length < 2) { toast('Add at least two steps'); return; }
+      S.funnels[sid] = steps; delete EXT.aud[sid]; save(); render(); loadAud(sid).then(function () { render(); });
+    });
+  };
+  ACT['test-channels'] = function () { sendChannels('✅ Test message from the Analysis workspace'); toast('Test sent'); };
+  ACT['wbr-pdf'] = function () {
+    var w = window.open('', '_blank'); if (!w) { toast('Allow pop-ups to print'); return; }
+    w.document.write('<!doctype html><meta charset="utf-8"><title>Weekly business review</title><style>body{font:14px/1.6 system-ui,sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem;color:#111}h1{font-size:1.6rem}h2{font-size:1.05rem;margin-top:1.4rem;border-bottom:1px solid #ddd;padding-bottom:.2rem}ul{padding-left:1.2rem}li{margin:.15rem 0}@media print{body{margin:0}}</style>' + mdToHtml(wbr()));
+    w.document.close(); setTimeout(function () { w.focus(); w.print(); }, 300);
+  };
+  ACT['wbr-mail'] = function () { location.href = 'mailto:?subject=' + encodeURIComponent('Weekly business review ' + isoDay(Date.now())) + '&body=' + encodeURIComponent(wbr().slice(0, 1800)); };
+  ACT['add-release'] = function () {
+    modal('New release note', [[{ name: 'version', label: 'Version', value: '2.2.0' }, { name: 'date', label: 'Date', type: 'date', value: isoDay(Date.now()) }], { name: 'type', label: 'Type', type: 'select', options: ['feature', 'improvement', 'fix', 'breaking'] }, { name: 'title', label: 'Title', required: true }, { name: 'notes', label: 'Notes', type: 'textarea' }], function (v) {
+      S.releases.push({ version: v.version, date: v.date, type: v.type, title: v.title, notes: v.notes }); logAct('Added release note “' + v.title + '”', 'decision'); save(); render();
+    });
+  };
+  ACT['dl-changelog'] = function () { download('changelog.json', JSON.stringify(S.releases.slice().sort(function (a, b) { return b.date.localeCompare(a.date); }), null, 2), 'application/json'); toast('Replace changelog.json in your site with this file'); };
+  ACT['copy-snippet'] = function () { copy(integrationSnippet(), 'Snippet copied'); };
+  ACT['tab-scroll'] = function () { var e = $('integ'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  ACT['load-sb'] = function () {
+    var sb = S.supabase; if (!sb.url || !sb.key) { toast('Add the project URL and anon key'); return; }
+    fetch(sb.url.replace(/\/$/, '') + '/rest/v1/rpc/analytics_summary', { method: 'POST', headers: { apikey: sb.key, Authorization: 'Bearer ' + sb.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_site: CFG.chat.siteId, p_days: 14 }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { throw new Error('Supabase said: ' + t.slice(0, 120)); }); })
+      .then(function (d) { EXT.sb = { data: d }; render(); }).catch(function (e) { EXT.sb = { error: e.message || 'Could not reach Supabase' }; render(); });
+  };
+  function itemModal(i) {
+    var it = i === null ? { title: '', product: 'nexora', lane: 'next', reach: 300, impact: 1, confidence: 80, effort: 2 } : S.roadmap[i];
+    modal(i === null ? 'New initiative' : 'Edit initiative', [{ name: 'title', label: 'Initiative', value: it.title, required: true },
+      [{ name: 'product', label: 'Product', type: 'select', options: PRODUCTS, value: it.product }, { name: 'lane', label: 'Lane', type: 'select', options: [['now', 'Now'], ['next', 'Next'], ['later', 'Later'], ['done', 'Done']], value: it.lane }],
+      [{ name: 'reach', label: 'Reach (people / quarter)', type: 'number', value: it.reach, min: 0 }, { name: 'impact', label: 'Impact', type: 'select', options: [['3', '3 · Massive'], ['2', '2 · High'], ['1', '1 · Medium'], ['0.5', '0.5 · Low'], ['0.25', '0.25 · Minimal']], value: String(it.impact) }],
+      [{ name: 'confidence', label: 'Confidence', type: 'select', options: [['100', '100% · High'], ['80', '80% · Medium'], ['50', '50% · Low']], value: String(it.confidence) }, { name: 'effort', label: 'Effort (person-weeks)', type: 'number', value: it.effort, min: 0.5, step: '0.5' }]],
+      function (v) {
+        var n = { id: it.id || uid(), title: v.title, product: v.product, lane: v.lane, reach: v.reach, impact: Number(v.impact), confidence: Number(v.confidence), effort: Math.max(.5, v.effort) };
+        if (i === null) S.roadmap.push(n); else S.roadmap[i] = n; logAct((i === null ? 'Added' : 'Updated') + ' initiative “' + n.title + '”', 'roadmap'); save(); render();
+      });
+  }
+  function copy(text, msg) { (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () { toast(msg); }, function () { toast('Copy failed'); }); }
+  function download(name, text, type) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: type })); a.download = name; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000); }
+
+  /* ================= events ================= */
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest && e.target.closest('[data-act]'); if (!el || !ACT[el.dataset.act]) return;
+    ACT[el.dataset.act](el);
+  });
+  function castVal(el) { if (el.type === 'checkbox') return el.checked; if (el.type === 'number' || el.type === 'range') return el.value === '' && el.hasAttribute('data-null') ? null : Number(el.value); return el.value; }
+  document.addEventListener('input', function (e) {
+    var el = e.target; if (!el.getAttribute || el.type !== 'range' || !el.hasAttribute('data-set')) return;
+    var path = el.getAttribute('data-set'), v = Number(el.value); setPath(path, v); save(); el.style.setProperty('--v', (path.slice(-4) === 'conf' ? v * 10 : v) + '%');
+    var out = document.querySelector('[data-out="' + path + '"]'); if (out) out.textContent = path.slice(-4) === 'conf' ? v + '/10' : v + '%';
+  });
+  document.addEventListener('change', function (e) {
+    var el = e.target; if (!el.getAttribute || !el.hasAttribute('data-set')) return;
+    var pth = el.getAttribute('data-set'), fm = pth.match(/^flags\.(\d+)\.(on|rollout)$/);
+    setPath(pth, castVal(el));
+    if (fm) { var fl = S.flags[fm[1]]; logAct(fm[2] === 'on' ? (fl.on ? 'Turned ON flag ' : 'Turned OFF flag ') + fl.key : 'Set ' + fl.key + ' rollout to ' + fl.rollout + '%', 'flag'); }
+    save(); render();
+  });
+  $('importFile').addEventListener('change', function (e) {
+    var f = e.target.files[0]; if (!f) return; var rd = new FileReader();
+    rd.onload = function () { try { var d = JSON.parse(rd.result); if (d.v !== 1) throw 0; S = norm(d); logAct('Imported a backup', 'info'); save(); render(); toast('Backup imported'); } catch (er) { toast('Not a valid backup file'); } e.target.value = ''; };
+    rd.readAsText(f);
+  });
+  var view = $('view');
+  view.addEventListener('dragstart', function (e) { var it = e.target.closest && e.target.closest('.item[data-i]'); if (!it) return; e.dataTransfer.setData('text/plain', it.dataset.i); e.dataTransfer.effectAllowed = 'move'; it.classList.add('drag'); });
+  view.addEventListener('dragend', function (e) { var it = e.target.closest && e.target.closest('.item'); if (it) it.classList.remove('drag'); });
+  view.addEventListener('dragover', function (e) { var l = e.target.closest && e.target.closest('.lane'); if (l) { e.preventDefault(); l.classList.add('over'); } });
+  view.addEventListener('dragleave', function (e) { var l = e.target.closest && e.target.closest('.lane'); if (l && !l.contains(e.relatedTarget)) l.classList.remove('over'); });
+  view.addEventListener('drop', function (e) {
+    var l = e.target.closest && e.target.closest('.lane'); if (!l) return; e.preventDefault();
+    var i = Number(e.dataTransfer.getData('text/plain')); if (S.roadmap[i]) { S.roadmap[i].lane = l.dataset.lane; save(); render(); toast('Moved to ' + l.dataset.lane); }
+  });
+
+  /* ---------- command palette ---------- */
+  var CMDS = TABS.map(function (t) { return { l: 'Go to ' + t[1], k: 'Navigate', f: function () { go(t[0]); } }; }).concat([
+    { l: 'Refresh live data', k: 'Action', f: function () { loadData(); toast('Refreshing…'); } }, { l: 'Probe sites now', k: 'Action', f: function () { runProbes(true); } },
+    { l: 'Add objective', k: 'Create', f: function () { go('okrs'); ACT['add-okr'](); } }, { l: 'Add roadmap initiative', k: 'Create', f: function () { go('roadmap'); ACT['add-item'](); } },
+    { l: 'Add feature flag', k: 'Create', f: function () { go('flags'); ACT['add-flag'](); } }, { l: 'Generate weekly report', k: 'Action', f: function () { go('overview'); setTimeout(ACT.wbr, 30); } },
+    { l: 'Export backup', k: 'Action', f: ACT['export-all'] }, { l: 'Toggle light / dark theme', k: 'Action', f: function () { $('themeBtn').click(); } }, { l: 'Open ranking page', k: 'Navigate', f: function () { location.href = './analysis.html'; } },
+    { l: 'Toggle demo data', k: 'Action', f: function () { ACT['toggle-demo'](); } }, { l: 'Open status page', k: 'Navigate', f: function () { location.href = './analysis-status.html'; } }, { l: 'Open changelog', k: 'Navigate', f: function () { location.href = './changelog.html'; } }]);
+  var palSel = 0, palList = [];
+  function palRender() {
+    var q = $('palIn').value.toLowerCase().trim(); palList = CMDS.filter(function (c) { return !q || c.l.toLowerCase().indexOf(q) > -1; }); palSel = clamp(palSel, 0, Math.max(0, palList.length - 1));
+    $('palList').innerHTML = palList.map(function (c, i) { return '<li class="' + (i === palSel ? 'on' : '') + '" data-i="' + i + '"><span>' + esc(c.l) + '</span><span class="muted">' + c.k + '</span></li>'; }).join('') || '<li class="muted">No matches</li>';
+  }
+  function palOpen() { $('palIn').value = ''; palSel = 0; palRender(); $('pal').showModal(); $('palIn').focus(); }
+  function palRun(i) { var c = palList[i]; if (!c) return; $('pal').close(); c.f(); }
+  $('palBtn').onclick = palOpen;
+  $('palIn').addEventListener('input', function () { palSel = 0; palRender(); });
+  $('palIn').addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { palSel = Math.min(palList.length - 1, palSel + 1); palRender(); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { palSel = Math.max(0, palSel - 1); palRender(); e.preventDefault(); }
+    else if (e.key === 'Enter') { palRun(palSel); e.preventDefault(); }
+  });
+  $('palList').addEventListener('click', function (e) { var li = e.target.closest('li[data-i]'); if (li) palRun(Number(li.dataset.i)); });
+  document.addEventListener('keydown', function (e) { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); palOpen(); } });
+
+  /* ---------- theme + boot ---------- */
+  (function () {
+    var t; try { t = localStorage.getItem(TKEY); } catch (e) {}
+    if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    $('themeBtn').onclick = function () { var n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try { localStorage.setItem(TKEY, n); } catch (e) {} };
+  })();
+  window.addEventListener('hashchange', function () { var id = location.hash.slice(1); if (V[id] && id !== cur) { cur = id; render(); ensure(id); } });
+  cur = V[location.hash.slice(1)] ? location.hash.slice(1) : 'overview';
+  (function () { var sel = $('langSel'); sel.value = LANG; document.documentElement.lang = LANG; sel.onchange = function () { LANG = sel.value; try { localStorage.setItem('nexora_lang', LANG); } catch (e) {} document.documentElement.lang = LANG; render(); }; })();
+  render(); loadData(); runProbes(false); ensure(cur);
+  setInterval(loadData, CFG.refreshMs); setInterval(function () { runProbes(false); }, 60000);
+})();
+</script>
+</body>
+</html>

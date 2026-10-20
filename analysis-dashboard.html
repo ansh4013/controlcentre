@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexora & Discipline — Analysis Dashboard</title>
+  <meta name="description" content="Traffic, security, errors and quality analysis for Nexora AI, Discipline and personal dashboard sites." />
+  <style>
+    :root {
+      --bg: #050816;
+      --card: #0d1225;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --purple: #a78bfa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      background: linear-gradient(90deg, #22d3ee, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    header p { color: var(--muted); font-size: 0.95rem; }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--accent);
+      margin-top: 0.75rem;
+    }
+    .grid {
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.4rem;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #334155; }
+    .card h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .card .value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .card .sub { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+    section { margin-bottom: 2.75rem; }
+    section > h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    section > h2::before {
+      content: '';
+      width: 4px;
+      height: 1.1em;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th { color: var(--muted); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .status.ok { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+    .status.warn { background: rgba(251, 191, 36, 0.15); color: var(--yellow); }
+    .status.bad { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+    .status.info { background: rgba(167, 139, 250, 0.15); color: var(--purple); }
+    ul.check { list-style: none; }
+    ul.check li {
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    ul.check li:last-child { border-bottom: none; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 0.45rem; flex-shrink: 0;
+    }
+    .dot.green { background: var(--green); }
+    .dot.yellow { background: var(--yellow); }
+    .dot.red { background: var(--red); }
+    .note {
+      background: rgba(34, 211, 238, 0.08);
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    .note strong { color: var(--accent); }
+    .sites-list a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .sites-list a:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    code {
+      background: #1e293b;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    @media (max-width: 640px) {
+      .card .value { font-size: 1.5rem; }
+      th, td { padding: 0.6rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Analysis Dashboard</h1>
+      <p>Nexora AI · Discipline · Personal Dashboard</p>
+      <span class="badge">Generated · 19 Sep 2026 · Static analysis + template</span>
+    </header>
+
+    <div class="note">
+      <strong>Important:</strong> Real visitor counts and user-level data are not publicly exposed by GitHub Pages or Vercel.
+      No analytics scripts (gtag, Plausible, Vercel Analytics, etc.) were detected on the live pages.
+      The numbers below are <strong>placeholders / examples</strong>. Replace them with data from your Vercel dashboard, Google Analytics, or a privacy-friendly tool such as Plausible / Umami after you add tracking.
+    </div>
+
+    <!-- Traffic Overview -->
+    <section>
+      <h2>Traffic Overview (Template)</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Nexora AI</h3>
+          <div class="value">—</div>
+          <div class="sub">Total page views (add analytics)</div>
+        </div>
+        <div class="card">
+          <h3>Discipline</h3>
+          <div class="value">—</div>
+          <div class="sub">Total page views (add analytics)</div>
+        </div>
+        <div class="card">
+          <h3>Main Dashboard</h3>
+          <div class="value">—</div>
+          <div class="sub">ansh4013.github.io/dashboard</div>
+        </div>
+        <div class="card">
+          <h3>Unique Visitors</h3>
+          <div class="value">—</div>
+          <div class="sub">Across all tracked sites</div>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:0.9rem;margin-top:-0.5rem;">
+        How to get real numbers:
+        <br>• Nexora (GitHub Pages) → add Cloudflare Web Analytics, Plausible or Umami
+        <br>• GitHub Pages → enable a third-party analytics script or use Cloudflare Web Analytics
+        <br>• Recommended privacy-first options: Plausible, Umami, or GoatCounter
+      </p>
+    </section>
+
+    <div class="note" style="margin-bottom:1.5rem">
+      <strong>Ranking:</strong> the multi-factor ranking system is a separate page &mdash; <a href="./analysis.html" style="color:var(--accent)">analysis/analysis.html</a>.
+    </div>
+
+    <!-- Sites -->
+    <section>
+      <h2>Tracked Sites</h2>
+      <div class="card sites-list">
+        <table>
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>URL</th>
+              <th>Host</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nexora AI</td>
+              <td><a href="https://ansh4013.github.io/aichatbot-/" target="_blank" rel="noopener">ansh4013.github.io/aichatbot-</a></td>
+              <td>GitHub Pages</td>
+              <td><span class="status ok">● Live</span></td>
+            </tr>
+            <tr>
+              <td>Discipline</td>
+              <td><a href="https://ansh4013.github.io/dashboard/discipline.html" target="_blank" rel="noopener">discipline.html</a></td>
+              <td>GitHub Pages</td>
+              <td><span class="status ok">● Live</span></td>
+            </tr>
+            <tr>
+              <td>Main Dashboard</td>
+              <td><a href="https://ansh4013.github.io/dashboard/dashboard.html" target="_blank" rel="noopener">dashboard.html</a></td>
+              <td>GitHub Pages</td>
+              <td><span class="status ok">● Live</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Security Analysis -->
+    <section>
+      <h2>Security Analysis</h2>
+      <div class="card">
+        <ul class="check">
+          <li>
+            <span class="dot green"></span>
+            <div>
+              <strong>HTTPS enforced</strong><br>
+              Both Vercel and GitHub Pages serve over HTTPS. HSTS present:
+              <code>strict-transport-security: max-age=63072000</code> (Vercel) and
+              <code>max-age=31556952</code> (GitHub).
+            </div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>
+              <strong>No Content-Security-Policy (CSP)</strong><br>
+              Neither site sends a CSP header or meta tag. This increases risk of XSS if any injected script appears.
+              Recommendation: add a CSP (start with report-only) that allows your CDNs (cdnjs, three.js, gsap) and your own origin.
+            </div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>
+              <strong>Missing security headers</strong><br>
+              Observed headers lack: <code>X-Content-Type-Options: nosniff</code>,
+              <code>X-Frame-Options</code> / <code>frame-ancestors</code>,
+              <code>Referrer-Policy</code>, <code>Permissions-Policy</code>.
+              GitHub Pages cannot set custom headers; use a meta CSP tag or put Cloudflare in front.
+            </div>
+          </li>
+          <li>
+            <span class="dot green"></span>
+            <div>
+              <strong>No mixed content</strong><br>
+              All scripts and assets load over HTTPS (cdnjs.cloudflare.com, same-origin).
+            </div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>
+              <strong>Third-party scripts</strong><br>
+              Nexora loads Three.js + GSAP from cdnjs. Subresource Integrity (SRI) hashes were not detected.
+              Recommendation: add <code>integrity</code> and <code>crossorigin</code> attributes to CDN scripts.
+            </div>
+          </li>
+          <li>
+            <span class="dot green"></span>
+            <div>
+              <strong>Access-Control-Allow-Origin: *</strong><br>
+              Present on both hosts. Acceptable for public static sites; not ideal if you later add authenticated APIs.
+            </div>
+          </li>
+          <li>
+            <span class="dot green"></span>
+            <div>
+              <strong>No obvious analytics / tracking cookies</strong><br>
+              No gtag, Facebook Pixel, or similar scripts found. Good for privacy by default.
+            </div>
+          </li>
+          <li>
+            <span class="dot info"></span>
+            <div>
+              <strong>Client-side only / static</strong><br>
+              Sites appear fully static (no forms posting sensitive data observed in initial scan).
+              Discipline is a habit tracker — ensure any future localStorage / backend storage does not leak PII without consent.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Errors & Quality -->
+    <section>
+      <h2>Errors & Quality Analysis</h2>
+      <div class="card">
+        <ul class="check">
+          <li>
+            <span class="dot green"></span>
+            <div>
+              <strong>HTTP status</strong> — All three pages return <code>200 OK</code>.
+            </div>
+          </li>
+          <li>
+            <span class="dot green"></span>
+            <div>
+              <strong>Viewport meta</strong> — Present on Nexora (<code>width=device-width, initial-scale=1.0</code>).
+            </div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>
+              <strong>No analytics / error monitoring</strong><br>
+              No Sentry, LogRocket, or similar. Console errors and JS exceptions will be invisible to you.
+              Recommendation: add a lightweight error reporter or at least Vercel Analytics + Speed Insights.
+            </div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>
+              <strong>Heavy client-side libraries</strong><br>
+              Nexora uses Three.js (r128) + GSAP + ScrollTrigger. Good for visuals; watch bundle size and mobile performance.
+              Consider lazy-loading 3D scenes or using a lighter version if Core Web Vitals suffer.
+            </div>
+          </li>
+          <li>
+            <span class="dot info"></span>
+            <div>
+              <strong>Cache headers</strong><br>
+              Vercel: <code>max-age=0, must-revalidate</code> (good for frequent updates).<br>
+              GitHub Pages: <code>max-age=600</code> (10 min). Fine for static content.
+            </div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>
+              <strong>Accessibility (quick pass)</strong><br>
+              Large decorative 3D / gradient backgrounds can reduce contrast. Ensure text meets WCAG AA contrast ratios
+              and interactive elements have visible focus states and proper labels.
+            </div>
+          </li>
+          <li>
+            <span class="dot info"></span>
+            <div>
+              <strong>Service Worker</strong><br>
+              Browser reports Service Worker support available; confirm whether you register one (PWA / offline support).
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- User Data -->
+    <section>
+      <h2>User Data</h2>
+      <div class="note">
+        <strong>No user-level data is available</strong> without an analytics or backend system you control.
+        Static sites do not collect IP, device, or behaviour data by default (which is good for privacy).
+        If you need “all data of users”, you must:
+        <br>1. Add an analytics provider (and respect consent / GDPR / CCPA).
+        <br>2. Or build your own lightweight beacon + database (e.g. Supabase / Cloudflare Workers + D1).
+        <br>Never collect personal data without a clear privacy policy and consent mechanism.
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Data type</th>
+              <th>Available now?</th>
+              <th>How to obtain</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Page views / unique visitors</td>
+              <td><span class="status bad">No</span></td>
+              <td>Vercel Analytics, Plausible, GA4, Umami</td>
+            </tr>
+            <tr>
+              <td>Referrers / countries / devices</td>
+              <td><span class="status bad">No</span></td>
+              <td>Same as above</td>
+            </tr>
+            <tr>
+              <td>Click / scroll events</td>
+              <td><span class="status bad">No</span></td>
+              <td>Custom events in analytics or PostHog</td>
+            </tr>
+            <tr>
+              <td>Registered users / accounts</td>
+              <td><span class="status info">N/A</span></td>
+              <td>Sites appear unauthenticated / static</td>
+            </tr>
+            <tr>
+              <td>Error logs / JS exceptions</td>
+              <td><span class="status bad">No</span></td>
+              <td>Sentry, LogRocket, or Vercel logs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Action Checklist -->
+    <section>
+      <h2>Recommended Next Steps</h2>
+      <div class="card">
+        <ul class="check">
+          <li>
+            <span class="dot yellow"></span>
+            <div>Add <code>tracker.js</code> (or Cloudflare Web Analytics / Plausible / Umami) to the Nexora GitHub Pages site.</div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>Add a privacy-friendly analytics script to the GitHub Pages sites (Discipline + Dashboard) — e.g. Plausible or Umami self-hosted.</div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>Add a meta CSP tag (or Cloudflare rules) to add CSP, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.</div>
+          </li>
+          <li>
+            <span class="dot yellow"></span>
+            <div>Add Subresource Integrity (SRI) hashes to all CDN scripts (Three.js, GSAP).</div>
+          </li>
+          <li>
+            <span class="dot green"></span>
+            <div>Keep the current “no tracking by default” approach until you consciously decide what metrics you need.</div>
+          </li>
+          <li>
+            <span class="dot info"></span>
+            <div>If Discipline later stores user habits in the cloud, document a privacy policy and use authenticated, encrypted storage.</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      Analysis generated for ansh4013.github.io / ansh4013.github.io/aichatbot- · Static inspection only · No personal user data was collected or accessed.
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Live ranking, workspace, chatbot analytics and status for Nexora AI, Discipline and the Dashboard.">
+<meta property="og:type" content="website"><meta property="og:title" content="Analysis Status">
+<meta property="og:description" content="Live ranking, workspace, chatbot analytics and status for Nexora AI, Discipline and the Dashboard.">
+<meta name="twitter:card" content="summary">
+<title>Analysis Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#06070f;--card:rgba(20,24,48,.62);--card-solid:#10142a;--line:rgba(160,170,255,.14);--line2:rgba(160,170,255,.28);--tx:#f3f5ff;--tx2:#a1a9d0;--tx3:#6b7399;--track:rgba(160,170,255,.14);
+    --c1:#4f8cff;--c2:#8b5cf6;--ok:#34d399;--warn:#fbbf24;--bad:#fb7185;--none:rgba(160,170,255,.16);--shadow:0 10px 40px rgba(0,0,0,.35);
+    --glow:radial-gradient(600px 300px at 20% -10%,rgba(79,140,255,.22),transparent 60%),radial-gradient(520px 320px at 100% 0%,rgba(139,92,246,.2),transparent 55%)}
+  [data-theme=light]{--bg:#f4f6fc;--card:rgba(255,255,255,.88);--card-solid:#fff;--line:rgba(30,40,90,.10);--line2:rgba(30,40,90,.22);--tx:#10152b;--tx2:#51597d;--tx3:#8a91b0;--track:rgba(30,40,90,.08);--none:rgba(30,40,90,.10);--shadow:0 10px 34px rgba(40,60,140,.10)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--glow),var(--bg);background-attachment:fixed;color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:860px;margin:0 auto;padding:1.4rem 1rem 3rem}
+  .top{display:flex;align-items:center;gap:.7rem;margin-bottom:1.3rem}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4f8cff,#8b5cf6 55%,#22d3ee);display:grid;place-items:center}
+  .top b{font-size:1.05rem;letter-spacing:-.01em}.grow{flex:1}
+  .ibtn{height:34px;padding:0 .8rem;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--tx);font:600 .78rem Inter,sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+  .ibtn:hover{border-color:var(--c1)}
+  .banner{border-radius:20px;padding:1.4rem 1.5rem;display:flex;align-items:center;gap:1rem;border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:1.2rem}
+  .banner.ok{background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(52,211,153,.05))}.banner.warn{background:linear-gradient(135deg,rgba(251,191,36,.22),rgba(251,191,36,.05))}.banner.bad{background:linear-gradient(135deg,rgba(251,113,133,.24),rgba(251,113,133,.05))}
+  .banner h1{margin:0;font-family:'Space Grotesk',sans-serif;font-size:clamp(1.3rem,3.4vw,1.8rem);letter-spacing:-.02em}
+  .banner p{margin:.2rem 0 0;color:var(--tx2);font-size:.85rem}
+  .ico{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.3rem;flex:none}
+  .ok .ico{background:var(--ok);color:#052e1d}.warn .ico{background:var(--warn);color:#3a2a00}.bad .ico{background:var(--bad);color:#3a0712}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(14px);padding:1.1rem 1.25rem;margin-bottom:1rem}
+  .svc{padding:1rem 0;border-top:1px solid var(--line)}.svc:first-child{border-top:0;padding-top:.2rem}
+  .svc-h{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem;flex-wrap:wrap}
+  .svc-h b{font-size:.98rem}.svc-h a{font-size:.74rem;color:var(--tx3);text-decoration:none}
+  .st{font-size:.76rem;font-weight:700;padding:.25rem .65rem;border-radius:999px}.st.ok{background:rgba(52,211,153,.16);color:var(--ok)}.st.warn{background:rgba(251,191,36,.16);color:var(--warn)}.st.bad{background:rgba(251,113,133,.16);color:var(--bad)}.st.none{background:var(--track);color:var(--tx3)}
+  .bars{display:grid;grid-template-columns:repeat(30,1fr);gap:3px}.bars i{display:block;height:34px;border-radius:4px;background:var(--none)}
+  .bars i.ok{background:var(--ok)}.bars i.warn{background:var(--warn)}.bars i.bad{background:var(--bad)}
+  .bars-l{display:flex;justify-content:space-between;font-size:.72rem;color:var(--tx3);margin-top:.4rem}
+  .stats{display:flex;gap:1.6rem;flex-wrap:wrap;margin-top:.6rem;font-size:.8rem;color:var(--tx2)}.stats b{color:var(--tx);font-family:'Space Grotesk',sans-serif}
+  h2{margin:0 0 .6rem;font-size:.95rem}.muted{color:var(--tx3);font-size:.78rem}
+  .inc{padding:.6rem 0;border-top:1px solid var(--line);font-size:.84rem;display:flex;gap:.7rem;align-items:center}.inc:first-of-type{border-top:0}
+  .inc span:last-child{margin-left:auto;color:var(--tx3);font-size:.76rem}
+  footer{text-align:center;color:var(--tx3);font-size:.74rem;margin-top:1.2rem;line-height:1.7}
+:focus-visible{outline:2px solid #4f8cff;outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg></div><b>Analysis Status</b><div class="grow"></div>
+    <a class="ibtn" href="./analysis.html">Ranking</a><a class="ibtn" href="./analysis-workspace.html">Workspace</a><button class="ibtn" id="themeBtn" aria-label="Toggle light or dark theme">◐</button></div>
+  <div class="banner ok" id="banner"><div class="ico" id="bIco">✓</div><div><h1 id="bTitle">Checking systems…</h1><p id="bSub">Running first health check</p></div></div>
+  <div class="card" id="svcs"></div>
+  <div class="card"><h2>Recent incidents</h2><div id="incs"><div class="muted">No incidents recorded yet.</div></div></div>
+  <footer>Checks run from your browser every 30 seconds while this page is open, and history is kept on this device.<br>For 24/7 monitoring, add a server-side checker.</footer>
+</div>
+<script>
+/**
+ * analysis-config.js
+ * -----------------
+ * Single place to configure the Analysis Ranking System.
+ * Works in the browser (window.NEXORA_RANKING_CONFIG) and in Node (require).
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.NEXORA_RANKING_CONFIG = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  return {
+    // Public counter API used by tracker.js
+    api: 'https://countapi.mileshilliard.com/api/v1',
+    timeoutMs: 8000,
+    concurrency: 6,
+
+    refreshMs: 30000,      // auto-refresh interval on analysis.html
+    historyDays: 14,       // days of daily history used for trend scoring (min 14)
+    engagedSeconds: 30,    // a visit counts as "engaged" after this many seconds
+    confidenceK: 30,       // views needed for ~50% confidence in a site's score
+    emaAlpha: 0.35,        // smoothing factor for recent-traffic average
+    closeRaceGap: 2,       // score gap (points) below which a race is "close"
+
+    sites: [
+      { id: 'nexora',     name: 'Nexora AI',      key: 'ansh4013_nexora_views',     url: 'https://ansh4013.github.io/aichatbot-/' },
+      { id: 'discipline', name: 'Discipline',     key: 'ansh4013_discipline_views', url: 'https://ansh4013.github.io/dashboard/discipline.html' },
+      { id: 'dashboard',  name: 'Main Dashboard', key: 'ansh4013_dashboard_views',  url: 'https://ansh4013.github.io/dashboard/' }
+    ],
+
+    // ---- Chatbot analytics (Nexora AI) ----
+    chat: {
+      siteId: 'nexora',
+      topics: [['coding', 'Coding'], ['writing', 'Writing'], ['study', 'Study & learning'], ['business', 'Business & career'], ['general', 'General']],
+      latencyBuckets: [['lat_1', '< 1 s', 1000], ['lat_2', '1 – 2 s', 2000], ['lat_4', '2 – 4 s', 4000], ['lat_8', '4 – 8 s', 8000], ['lat_9', '8 s +', 16000]],
+      depthBuckets: [['mpc_1', '1 message'], ['mpc_2', '2 messages'], ['mpc_3_5', '3 – 5 messages'], ['mpc_6p', '6+ messages']],
+      thresholds: { errorRate: 0.10, csat: 0.60, p95Ms: 8000, minReplies: 20, minVotes: 10 }
+    },
+    sources: [['direct', 'Direct'], ['search', 'Search'], ['social', 'Social'], ['github', 'GitHub'], ['email', 'Email'], ['other', 'Other']],
+    devices: [['desktop', 'Desktop'], ['mobile', 'Mobile']],
+    vitals: [['lcp', 'Loading (LCP)', '≤ 2.5 s'], ['cls', 'Layout shift (CLS)', '≤ 0.1'], ['inp', 'Responsiveness (INP)', '≤ 200 ms']],
+
+    // How sites link to each other (feeds PageRank "authority"). from/to are site ids.
+    links: [
+      { from: 'dashboard', to: 'nexora' },
+      { from: 'dashboard', to: 'discipline' }
+    ],
+
+    // 'weighted' = weighted sum of metric scores
+    // 'fusion'   = weighted Reciprocal Rank Fusion (merge each metric's ranking, like search engines)
+    method: 'weighted',
+    bayesM: 20,            // IMDb-style prior strength (sessions) for engagement quality
+    hotGravity: 1.8,       // Hacker-News-style freshness decay
+
+    // Relative importance of each metric (any scale — normalised automatically)
+    weights: { reach: 15, traction: 15, momentum: 10, consistency: 10, engagement: 10, authority: 10, freshness: 15, elo: 15 },
+
+    presets: {
+      Balanced:   { reach: 15, traction: 15, momentum: 10, consistency: 10, engagement: 10, authority: 10, freshness: 15, elo: 15 },
+      Popularity: { reach: 40, traction: 25, momentum: 0,  consistency: 5,  engagement: 0,  authority: 15, freshness: 5,  elo: 10 },
+      Trending:   { reach: 5,  traction: 15, momentum: 30, consistency: 0,  engagement: 0,  authority: 0,  freshness: 35, elo: 15 },
+      Quality:    { reach: 5,  traction: 10, momentum: 5,  consistency: 20, engagement: 40, authority: 10, freshness: 0,  elo: 10 },
+      Competitive:{ reach: 5,  traction: 15, momentum: 10, consistency: 5,  engagement: 5,  authority: 5,  freshness: 15, elo: 40 }
+    }
+  };
+});
+
+</script>
+<script>
+(function () {
+  var CFG = window.NEXORA_RANKING_CONFIG, SKEY = 'tg_status_probes_v1', DAY = 86400000;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  function readJ(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  var store = readJ(SKEY) || {};
+  function all(id) {
+    var ws = readJ('tg_workspace_v1'), a = (store[id] || []).slice();
+    if (ws && ws.uptime && ws.uptime[id]) a = a.concat(ws.uptime[id]);     // share history with the workspace page
+    var seen = {}; return a.filter(function (x) { var k = x.t; if (seen[k]) return false; seen[k] = 1; return true; }).sort(function (x, y) { return x.t - y.t; });
+  }
+  async function probe(site) {
+    var t0 = performance.now(), ctrl = new AbortController(), to = setTimeout(function () { ctrl.abort(); }, 8000);
+    try { await fetch(site.url + (site.url.indexOf('?') > -1 ? '&' : '?') + '_st=' + Date.now(), { mode: 'no-cors', cache: 'no-store', signal: ctrl.signal }); return { t: Date.now(), ok: true, ms: Math.round(performance.now() - t0) }; }
+    catch (e) { return { t: Date.now(), ok: false, ms: null }; } finally { clearTimeout(to); }
+  }
+  function level(p) { return !p ? 'none' : !p.ok ? 'bad' : p.ms > 2500 ? 'warn' : 'ok'; }
+  var LABEL = { ok: 'Operational', warn: 'Degraded', bad: 'Outage', none: 'No data' };
+  function pctl(a, q) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; }); return s[Math.min(s.length - 1, Math.floor(q * s.length))]; }
+  function render() {
+    var worst = 'ok', rows = '', incidents = [];
+    CFG.sites.forEach(function (s) {
+      var a = all(s.id), last = a[a.length - 1], lv = level(last), n = a.length, ok = a.filter(function (x) { return x.ok; }).length;
+      var ms = a.filter(function (x) { return x.ok; }).map(function (x) { return x.ms; });
+      if (lv === 'bad') worst = 'bad'; else if (lv === 'warn' && worst !== 'bad') worst = 'warn';
+      var bars = '', d;
+      for (d = 29; d >= 0; d--) {
+        var from = Date.now() - (d + 1) * DAY, to = Date.now() - d * DAY, day = a.filter(function (x) { return x.t >= from && x.t < to; });
+        var c = 'none', title = new Date(to).toDateString() + ': no data';
+        if (day.length) { var av = day.filter(function (x) { return x.ok; }).length / day.length; c = av >= .999 ? 'ok' : av >= .95 ? 'warn' : 'bad'; title = new Date(to).toDateString() + ': ' + (av * 100).toFixed(1) + '% (' + day.length + ' checks)'; }
+        bars += '<i class="' + c + '" title="' + esc(title) + '"></i>';
+      }
+      rows += '<div class="svc"><div class="svc-h"><b>' + esc(s.name) + '</b><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(s.url.replace('https://', '')) + '</a><span class="grow" style="flex:1"></span><span class="st ' + lv + '">' + LABEL[lv] + '</span></div>' +
+        '<div class="bars">' + bars + '</div><div class="bars-l"><span>30 days ago</span><span>Today</span></div>' +
+        '<div class="stats"><span>Uptime <b>' + (n ? (ok / n * 100).toFixed(2) + '%' : '—') + '</b></span><span>Median response <b>' + (pctl(ms, .5) === null ? '—' : pctl(ms, .5) + ' ms') + '</b></span><span>p95 <b>' + (pctl(ms, .95) === null ? '—' : pctl(ms, .95) + ' ms') + '</b></span><span>Checks <b>' + n + '</b></span></div></div>';
+      var run = null;
+      a.forEach(function (x) { if (!x.ok) { if (!run) run = { s: s.name, from: x.t, to: x.t }; else run.to = x.t; } else if (run) { incidents.push(run); run = null; } });
+      if (run) { run.open = true; incidents.push(run); }
+    });
+    $('svcs').innerHTML = rows;
+    var b = $('banner'); b.className = 'banner ' + worst;
+    $('bIco').textContent = worst === 'ok' ? '✓' : worst === 'warn' ? '!' : '✕';
+    $('bTitle').textContent = worst === 'ok' ? 'All systems operational' : worst === 'warn' ? 'Some systems are degraded' : 'Service disruption detected';
+    $('bSub').textContent = 'Last checked ' + new Date().toLocaleTimeString();
+    incidents.sort(function (x, y) { return y.from - x.from; });
+    $('incs').innerHTML = incidents.length ? incidents.slice(0, 8).map(function (i) {
+      var mins = Math.max(1, Math.round((i.to - i.from) / 60000));
+      return '<div class="inc"><span class="st ' + (i.open ? 'bad' : 'warn') + '">' + (i.open ? 'Ongoing' : 'Resolved') + '</span><span>' + esc(i.s) + ' was unreachable</span><span>' + new Date(i.from).toLocaleString() + ' · ~' + mins + ' min</span></div>';
+    }).join('') : '<div class="muted">No incidents recorded yet.</div>';
+  }
+  async function run() {
+    var res = await Promise.all(CFG.sites.map(probe));
+    CFG.sites.forEach(function (s, i) { var a = store[s.id] || (store[s.id] = []); a.push(res[i]); if (a.length > 1500) a.splice(0, a.length - 1500); });
+    try { localStorage.setItem(SKEY, JSON.stringify(store)); } catch (e) {}
+    render();
+  }
+  (function () { var t; try { t = localStorage.getItem('nexora_rank_theme_v1'); } catch (e) {} if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    $('themeBtn').onclick = function () { var n = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try { localStorage.setItem('nexora_rank_theme_v1', n); } catch (e) {} }; })();
+  render(); run(); setInterval(run, 30000);
+})();
+</script>
+</body>
+</html>

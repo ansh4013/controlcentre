@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexora + Discipline — Real-time Analysis Dashboard</title>
+  <meta name="description" content="Live visitor counters, security & quality analysis for Nexora AI and Discipline." />
+  <style>
+    :root {
+      --bg: #050816;
+      --card: #0d1225;
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --purple: #a78bfa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.1rem 3.5rem; }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.25rem);
+      background: linear-gradient(90deg, #22d3ee, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p { color: var(--muted); font-size: 0.9rem; margin-top: 0.35rem; }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      margin-top: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .live-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+    .grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-bottom: 1.75rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+    }
+    .card h3 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .card .sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+    section { margin-bottom: 2.25rem; }
+    section > h2 {
+      font-size: 1.15rem;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    section > h2::before {
+      content: '';
+      width: 4px;
+      height: 1em;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    .note {
+      background: rgba(34, 211, 238, 0.07);
+      border: 1px solid rgba(34, 211, 238, 0.22);
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+    .note strong { color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 0.65rem 0.85rem; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; }
+    .status {
+      display: inline-flex;
+      font-size: 0.75rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 5px;
+      font-weight: 500;
+    }
+    .status.ok { background: rgba(52, 211, 153, 0.15); color: var(--green); }
+    .status.warn { background: rgba(251, 191, 36, 0.15); color: var(--yellow); }
+    .status.bad { background: rgba(248, 113, 113, 0.15); color: var(--red); }
+    ul.check { list-style: none; }
+    ul.check li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      font-size: 0.9rem;
+    }
+    ul.check li:last-child { border-bottom: none; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 0.4rem; flex-shrink: 0;
+    }
+    .dot.green { background: var(--green); }
+    .dot.yellow { background: var(--yellow); }
+    .dot.red { background: var(--red); }
+    code {
+      background: #1e293b;
+      padding: 0.12rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.82em;
+    }
+    pre {
+      background: #0a0f1c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.45rem 0.9rem;
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background: rgba(34, 211, 238, 0.25); }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 2.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .refresh-info {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: right;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Auto-grading / ranking ---- */
+    .rank-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.12rem .45rem;border-radius:5px;background:rgba(167,139,250,.15);color:var(--purple);margin-right:.4rem}
+    .grade{display:inline-flex;align-items:center;justify-content:center;min-width:2.1rem;font-weight:800;font-size:.85rem;padding:.15rem .5rem;border-radius:6px}
+    .grade.r1{background:rgba(251,191,36,.2);color:var(--yellow)}
+    .grade.r2{background:rgba(148,163,184,.2);color:#cbd5e1}
+    .grade.r3{background:rgba(217,119,6,.2);color:#f59e0b}
+    .grade.rn{background:rgba(167,139,250,.15);color:var(--purple)}
+    .grade.g-na{background:#1e293b;color:var(--muted)}
+    .bar{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;min-width:80px}
+    .bar>i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#a78bfa);width:0;transition:width .6s}
+    .scale{font-size:.78rem;color:var(--muted);margin-top:.75rem}
+    @media(max-width:600px){.hide-sm{display:none}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Real-time Analysis Dashboard</h1>
+      <p>Nexora AI · Discipline · Main Dashboard</p>
+      <div class="live-badge">LIVE COUNTERS · auto-refresh 15s</div>
+    </header>
+
+    <div class="note">
+      <strong>How real-time works:</strong> Counters are powered by a free public API
+      (<code>countapi.mileshilliard.com</code>). To start collecting real visitors you must
+      add the <code>tracker.js</code> script to your live pages (instructions below).
+      Until the script is installed, numbers only increase when this dashboard or the tracker is opened.
+    </div>
+
+    <div class="refresh-info" id="lastUpdate">Loading…</div>
+
+    <!-- Live counters (auto-ranked by views) -->
+    <section>
+      <h2>Live Visitor Counts <span style="font-size:.72rem;color:var(--muted);font-weight:400">· sorted automatically by views</span></h2>
+      <div class="grid" id="siteCards"></div>
+      <div class="grid" style="margin-top:-.75rem">
+        <div class="card">
+          <h3>Activity Pings</h3>
+          <div class="value" id="onlineCount">—</div>
+          <div class="sub">Presence signals (approx)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Automatic grading system -->
+    <section>
+      <h2>Automatic Ranking</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Site</th><th>Views</th><th class="hide-sm">Share</th><th>Position</th></tr>
+          </thead>
+          <tbody id="rankBody"><tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr></tbody>
+        </table>
+        <div class="scale" id="gradeScale"></div>
+      </div>
+    </section>
+
+    <!-- Install tracker -->
+    <section>
+      <h2>Install Tracker (required for real users)</h2>
+      <div class="card">
+        <p style="margin-bottom:0.75rem;color:var(--muted);font-size:0.9rem;">
+          Add this single line before the closing <code>&lt;/body&gt;</code> tag on each site.
+        </p>
+        <pre id="installSnippet">&lt;!-- Nexora / Discipline tracker --&gt;
+&lt;script src="PATH-TO/tracker.js" data-site="nexora" async&gt;&lt;/script&gt;
+
+&lt;!-- For Discipline page use: data-site="discipline" --&gt;
+&lt;!-- For main dashboard use:  data-site="dashboard"  --&gt;</pre>
+        <p style="margin-top:0.9rem;font-size:0.88rem;color:var(--muted);">
+          You can host <code>tracker.js</code> on the same GitHub Pages repo, on Vercel, or any CDN.
+          After adding it, every page load will increment the live counters above.
+        </p>
+        <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('installSnippet').innerText)">Copy snippet</button>
+      </div>
+    </section>
+
+    <!-- Sites status -->
+    <section>
+      <h2>Sites Status</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Site</th><th>URL</th><th>Host</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nexora AI</td>
+              <td><a href="https://ansh4013.github.io/aichatbot-/" target="_blank" rel="noopener" style="color:var(--accent)">ansh4013.github.io/aichatbot-</a></td>
+              <td>GitHub Pages</td>
+              <td><span class="status ok">Live</span></td>
+            </tr>
+            <tr>
+              <td>Discipline</td>
+              <td><a href="https://ansh4013.github.io/dashboard/discipline.html" target="_blank" rel="noopener" style="color:var(--accent)">discipline.html</a></td>
+              <td>GitHub Pages</td>
+              <td><span class="status ok">Live</span></td>
+            </tr>
+            <tr>
+              <td>Dashboard</td>
+              <td><a href="https://ansh4013.github.io/dashboard/dashboard.html" target="_blank" rel="noopener" style="color:var(--accent)">dashboard.html</a></td>
+              <td>GitHub Pages</td>
+              <td><span class="status ok">Live</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Security -->
+    <section>
+      <h2>Security Analysis</h2>
+      <div class="card">
+        <ul class="check">
+          <li><span class="dot green"></span><div><strong>HTTPS + HSTS</strong> — Both hosts enforce HTTPS with long-lived HSTS headers.</div></li>
+          <li><span class="dot yellow"></span><div><strong>No Content-Security-Policy</strong> — Add a CSP header (GitHub Pages cannot set headers — use a <code>&lt;meta http-equiv&gt;</code> CSP or put Cloudflare in front) to reduce XSS risk.</div></li>
+          <li><span class="dot yellow"></span><div><strong>Missing headers</strong> — <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, frame protection not present.</div></li>
+          <li><span class="dot green"></span><div><strong>No mixed content</strong> — All scripts load over HTTPS.</div></li>
+          <li><span class="dot yellow"></span><div><strong>CDN scripts lack SRI</strong> — Three.js & GSAP from cdnjs should include <code>integrity</code> hashes.</div></li>
+          <li><span class="dot green"></span><div><strong>No third-party trackers</strong> by default (good for privacy). This tracker is opt-in and cookie-free.</div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Errors & quality -->
+    <section>
+      <h2>Errors & Quality</h2>
+      <div class="card">
+        <ul class="check">
+          <li><span class="dot green"></span><div>All three pages return HTTP 200.</div></li>
+          <li><span class="dot yellow"></span><div>No error monitoring (Sentry etc.) — JS exceptions are invisible.</div></li>
+          <li><span class="dot yellow"></span><div>Heavy client libs (Three.js + GSAP) — watch Core Web Vitals on mobile.</div></li>
+          <li><span class="dot green"></span><div>Viewport meta present on Nexora.</div></li>
+          <li><span class="dot info" style="background:#a78bfa"></span><div>This dashboard itself auto-refreshes counters every 15 seconds.</div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Analysis script -->
+    <section>
+      <h2>Browser Analysis Script</h2>
+      <div class="card">
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:0.75rem;">
+          Paste this into the browser console on any of your pages for an instant local security / quality report.
+        </p>
+        <pre id="analysisScript">(() => {
+  const report = {
+    url: location.href,
+    title: document.title,
+    https: location.protocol === 'https:',
+    scripts: [...document.scripts].map(s => s.src || 'inline').filter(Boolean),
+    hasCSP: !!(document.querySelector('meta[http-equiv*="Content-Security"]') ||
+              document.querySelector('meta[name*="Content-Security"]')),
+    viewport: !!document.querySelector('meta[name="viewport"]'),
+    externalScripts: [...document.scripts].filter(s => s.src && !s.src.includes(location.host)).map(s => s.src),
+    imagesWithoutAlt: [...document.images].filter(i => !i.alt).length,
+    linksWithoutText: [...document.links].filter(a => !a.textContent.trim() && !a.getAttribute('aria-label')).length
+  };
+  console.table(report);
+  console.log('%cNexora Analysis Report', 'color:#22d3ee;font-size:14px;font-weight:bold');
+  console.log(report);
+  return report;
+})();</pre>
+        <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('analysisScript').innerText)">Copy analysis script</button>
+      </div>
+    </section>
+
+    <footer>
+      Counters are public & anonymous · No personal data collected · Generated for ansh4013 · 19 Sep 2026
+    </footer>
+  </div>
+
+  <script>
+    const API = 'https://countapi.mileshilliard.com/api/v1';
+    const KEYS = {
+      nexora: 'ansh4013_nexora_views',
+      discipline: 'ansh4013_discipline_views',
+      dashboard: 'ansh4013_dashboard_views',
+      online: 'ansh4013_online_ping'
+    };
+
+    const SITES = [
+      { id: 'nexora',     name: 'Nexora AI',      key: KEYS.nexora,     sub: 'ansh4013.github.io/aichatbot-' },
+      { id: 'discipline', name: 'Discipline',     key: KEYS.discipline, sub: 'Total page views' },
+      { id: 'dashboard',  name: 'Main Dashboard', key: KEYS.dashboard,  sub: 'ansh4013.github.io/dashboard' }
+    ];
+
+    // Automatic ranking: the site with the most views is 1st, next is 2nd, and so on.
+    // Sites with equal views share the same rank. Sites with no data go last.
+    const ORDINALS = ['1st', '2nd', '3rd'];
+    const ordinal = n => ORDINALS[n - 1] || `${n}th`;
+    const MEDALS = ['🥇', '🥈', '🥉'];
+
+    function assignRanks(rows) {
+      let prev = null, rank = 0;
+      rows.forEach((r, i) => {
+        if (typeof r.views !== 'number') { r.rank = null; return; }
+        if (r.views !== prev) { rank = i + 1; prev = r.views; }
+        r.rank = rank;
+      });
+    }
+
+    function badge(rank) {
+      if (!rank) return '<span class="grade rn">—</span>';
+      return `<span class="grade ${rank <= 3 ? 'r' + rank : 'rn'}">${MEDALS[rank - 1] || ''} ${ordinal(rank)}</span>`;
+    }
+
+    document.getElementById('gradeScale').textContent =
+      'Ranked automatically by views: the site with the most views is 1st, then 2nd, 3rd… Equal views share a rank.';
+
+    async function getCount(key) {
+      try {
+        const res = await fetch(`${API}/get/${key}`, { cache: 'no-store' });
+        const data = await res.json();
+        return Number(data.value ?? 0);
+      } catch {
+        return null;
+      }
+    }
+
+    const fmt = v => (typeof v === 'number' ? v.toLocaleString() : '—');
+
+    function render(rows) {
+      // automatic arrangement: numeric views desc, unavailable last, then name
+      rows.sort((a, b) => {
+        const av = typeof a.views === 'number' ? a.views : -1;
+        const bv = typeof b.views === 'number' ? b.views : -1;
+        return bv - av || a.name.localeCompare(b.name);
+      });
+      assignRanks(rows);
+      const total = rows.reduce((t, r) => t + (typeof r.views === 'number' ? r.views : 0), 0);
+
+      document.getElementById('siteCards').innerHTML = rows.map((r, i) => {
+        return `<div class="card">
+          <h3><span class="rank-badge">#${r.rank || '—'}</span>${r.name}</h3>
+          <div class="value">${fmt(r.views)}</div>
+          <div class="sub">${r.sub} · ${badge(r.rank)}</div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('rankBody').innerHTML = rows.map((r, i) => {
+        const pct = total && typeof r.views === 'number' ? Math.round(r.views / total * 100) : 0;
+        return `<tr>
+          <td>#${r.rank || '—'}</td>
+          <td>${r.name}</td>
+          <td>${fmt(r.views)}</td>
+          <td class="hide-sm"><div class="bar"><i style="width:${pct}%"></i></div><span style="font-size:.72rem;color:var(--muted)">${pct}%</span></td>
+          <td>${badge(r.rank)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function refresh() {
+      const [counts, online] = await Promise.all([
+        Promise.all(SITES.map(s => getCount(s.key))),
+        getCount(KEYS.online)
+      ]);
+      render(SITES.map((s, i) => ({ ...s, views: counts[i] })));
+      document.getElementById('onlineCount').textContent = fmt(online);
+      document.getElementById('lastUpdate').textContent =
+        'Last updated: ' + new Date().toLocaleTimeString();
+    }
+
+    refresh();
+    setInterval(refresh, 15000);
+
+    // Also register this dashboard visit so the counter is never completely zero
+    fetch(`${API}/hit/${KEYS.dashboard}`, { cache: 'no-store' }).catch(() => {});
+  </script>
+</body>
+</html>

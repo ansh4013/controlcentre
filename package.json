@@ -1,0 +1,14 @@
+{
+  "name": "ansh4013-dashboard",
+  "version": "1.1.0",
+  "description": "Personal dashboard + Nexora analysis, login gate, and live counters",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "analyze": "node analyze-sites.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

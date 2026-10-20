@@ -1,0 +1,56 @@
+# Move this file to  .github/workflows/deploy.yml  in your repository.
+# On every push to main it checks the scripts and publishes the site to GitHub Pages.
+# (Enable it once under Settings -> Pages -> Build and deployment -> Source: GitHub Actions.)
+name: Check and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax-check every script
+        run: for f in *.js; do node --check "$f"; done
+      - name: Ranking engine smoke test
+        run: |
+          node -e "
+            const A = require('./analysis-algorithms.js');
+            const pr = A.pageRank(['a','b','c'], [{from:'a',to:'b'},{from:'a',to:'c'}]);
+            const sum = Object.values(pr).reduce((t,v)=>t+v,0);
+            if (Math.abs(sum-1) > 1e-6) throw new Error('PageRank does not sum to 1');
+            const days = Array.from({length:14},(_,i)=>new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10).replace(/-/g,''));
+            const f = A.forecast(Array(14).fill(20), days, 7);
+            if (Math.round(f.points[0].value) !== 20) throw new Error('Forecast of a flat series should stay flat');
+            console.log('engine ok');
+          "
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

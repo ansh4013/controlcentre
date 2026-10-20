@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXORA — Enter</title>
+  <meta name="theme-color" content="#050816" />
+  <!-- Supabase JS client (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #050816;
+      --card: rgba(13, 18, 37, 0.92);
+      --border: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --accent2: #a78bfa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(167, 139, 250, 0.08), transparent);
+    }
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 1.75rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .logo { text-align: center; margin-bottom: 1.5rem; }
+    .logo span {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo p { color: var(--muted); font-size: 0.85rem; margin-top: 0.4rem; }
+    label {
+      display: block;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0a0f1c;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 400px) { .row { grid-template-columns: 1fr; } }
+    button {
+      width: 100%;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #0891b2, #7c3aed);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.25rem;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    button:hover { opacity: 0.92; }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .privacy {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .privacy a { color: var(--accent); }
+    .msg {
+      display: none;
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .msg.ok {
+      display: block;
+      background: rgba(52, 211, 153, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+    .msg.err {
+      display: block;
+      background: rgba(248, 113, 113, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+    .skip {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .skip:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <span>NEXORA</span>
+      <p>Digital Intelligence Reimagined</p>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <form id="loginForm" autocomplete="on">
+      <label for="name">Full name *</label>
+      <input type="text" id="name" name="name" required placeholder="Your name" maxlength="80" />
+
+      <label for="email">Email *</label>
+      <input type="email" id="email" name="email" required placeholder="you@example.com" maxlength="120" />
+
+      <div class="row">
+        <div>
+          <label for="role">I am a</label>
+          <select id="role" name="role">
+            <option value="Visitor">Visitor</option>
+            <option value="Developer">Developer</option>
+            <option value="Founder">Founder</option>
+            <option value="Student">Student</option>
+            <option value="Investor">Investor</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="interest">Interest</label>
+          <select id="interest" name="interest">
+            <option value="Explore">Just exploring</option>
+            <option value="AI Chatbot">AI Chatbot</option>
+            <option value="Collaboration">Collaboration</option>
+            <option value="Feedback">Give feedback</option>
+            <option value="Job">Job / opportunity</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="message">Message (optional)</label>
+      <input type="text" id="message" name="message" placeholder="Anything you'd like to say…" maxlength="200" />
+
+      <button type="submit" id="submitBtn">Enter Nexora →</button>
+    </form>
+
+    <p class="privacy">
+      By continuing you agree that your details may be stored to improve the product.
+      We do not sell your data. <a href="#" id="privacyLink">Privacy note</a>
+    </p>
+    <a class="skip" href="https://ansh4013.github.io/aichatbot-/" id="skipLink">Skip for now</a>
+  </div>
+
+  <script>
+    /**
+     * ============================================================
+     *  CONFIG — paste your Supabase project values here
+     * ============================================================
+     * Project URL + anon (public) key from:
+     * Supabase Dashboard → Project Settings → API
+     */
+    const SUPABASE_URL  = 'https://YOUR_PROJECT_REF.supabase.co';
+    const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+
+    // Where to send the user after successful login
+    const DEFAULT_REDIRECT = 'https://ansh4013.github.io/aichatbot-/';
+
+    // ----------------------------------------------------------
+    const params = new URLSearchParams(location.search);
+    const REDIRECT_URL = params.get('return') || DEFAULT_REDIRECT;
+    const SESSION_KEY = 'nexora_logged_in';
+
+    // Already logged in this session → skip form
+    if (sessionStorage.getItem(SESSION_KEY)) {
+      window.location.replace(REDIRECT_URL);
+    }
+
+    // Init Supabase client
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const form = document.getElementById('loginForm');
+    const btn  = document.getElementById('submitBtn');
+    const msg  = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'msg';
+      msg.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      const payload = {
+        name:       document.getElementById('name').value.trim(),
+        email:      document.getElementById('email').value.trim().toLowerCase(),
+        role:       document.getElementById('role').value,
+        interest:   document.getElementById('interest').value,
+        message:    document.getElementById('message').value.trim() || null,
+        page:       location.href,
+        user_agent: (navigator.userAgent || '').slice(0, 250)
+      };
+
+      if (!payload.name || !payload.email || !payload.email.includes('@')) {
+        showError('Please enter a valid name and email.');
+        resetBtn();
+        return;
+      }
+
+      // Safety check so the page fails clearly if keys are still placeholders
+      if (SUPABASE_URL.includes('YOUR_PROJECT') || SUPABASE_ANON.includes('YOUR_SUPABASE')) {
+        showError('Supabase keys not configured. Edit SUPABASE_URL and SUPABASE_ANON in this file.');
+        resetBtn();
+        return;
+      }
+
+      try {
+        const { data, error } = await sb
+          .from('nexora_logins')
+          .insert([payload])
+          .select('id')
+          .single();
+
+        if (error) throw error;
+
+        // Mark session so gate doesn't ask again
+        sessionStorage.setItem(SESSION_KEY, '1');
+        try {
+          localStorage.setItem('nexora_user', JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            id: data?.id,
+            at: new Date().toISOString()
+          }));
+        } catch (_) {}
+
+        msg.className = 'msg ok';
+        msg.textContent = 'Welcome! Redirecting…';
+        setTimeout(() => {
+          window.location.href = REDIRECT_URL;
+        }, 800);
+
+      } catch (err) {
+        console.error(err);
+        const text = err?.message || String(err);
+        showError('Could not save: ' + text);
+        resetBtn();
+      }
+    });
+
+    function showError(text) {
+      msg.className = 'msg err';
+      msg.textContent = text;
+    }
+    function resetBtn() {
+      btn.disabled = false;
+      btn.textContent = 'Enter Nexora →';
+    }
+
+    document.getElementById('privacyLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('We store only the details you submit (name, email, role, interest, optional message) plus timestamp and basic browser info in a private Supabase database controlled by the site owner. Do not submit passwords or payment information.');
+    });
+  </script>
+</body>
+</html>
